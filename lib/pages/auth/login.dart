@@ -66,10 +66,12 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: const CustomAppBar(title: 'Iniciar Sesión'),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
+        child: Center(
+
         child: Form(
           key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: ListView(
+            shrinkWrap: true,
             children: [
               Image.asset('assets/img/logos/logo.png', height: 150),
               const SizedBox(height: 5),
@@ -140,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
+        )
       ),
     );
   }

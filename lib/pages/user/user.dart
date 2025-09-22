@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import './users.dart';
 import '../pets/pets.dart';
+import '../invoices/history_invoice.dart';
 
 class UserScreen extends StatelessWidget {
   final String username;
@@ -64,6 +65,8 @@ class UserScreen extends StatelessWidget {
                 _buildFeatureCard(context, Icons.person, 'Usuarios', const UserHomePage()),
                 const SizedBox(height: 10),
                 _buildFeatureCard(context, Icons.pets, 'Mascotas', const PetHomePage()),
+                const SizedBox(height: 10),
+                _buildFeatureCard(context, Icons.receipt_long, 'Facturas', const HistorialFacturasScreen()),
                 const SizedBox(height: 10),
               ],
             )

@@ -25,6 +25,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/img/logos/
+    - assets/img/images/
 
 flutter_icons:
   android: "huellas_salud_movil"

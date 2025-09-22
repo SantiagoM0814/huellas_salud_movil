@@ -7,16 +7,15 @@ import '../../widgets/navigation_drawer.dart';
 import '../../widgets/navigation_buttom.dart';
 import '../user/user.dart';
 import '../auth/login.dart';
+import '../../models/products.dart';
+import '../../services/products_services.dart';
+import '../../widgets/productCard.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
   final String password;
 
-  const HomeScreen({
-    super.key,
-    required this.username,
-    required this.password,
-  });
+  const HomeScreen({super.key, required this.username, required this.password});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,20 +25,28 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
+
   late List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _pages = [
-      HomeContent(username: widget.username),
-      SettingsScreen(username: widget.username, password: widget.password),
+      HomeContent(
+        username: widget.username,
+        onGoToProducts: () {
+          setState(() {
+            _currentIndex = 2; // 🔹 cambia al índice de productos
+          });
+          _pageController.jumpToPage(2); // 🔹 navega al PageView
+        },
+      ),
+      _buildDevelopmentPage("Anuncios"),
       const ProductHomePage(),
       const NotificationsScreen(),
       UserScreen(username: widget.username, password: widget.password),
     ];
-} 
+  }
 
   void _onDrawerItemSelected(int index) {
     setState(() {
@@ -53,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (route) => false,  
+      (route) => false,
     );
   }
 
@@ -61,17 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      appBar: CustomAppBar(
-        title: _getTitle(),
-        showBackButton: false,
-        // onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
-      ),
-      // drawer: CustomDrawer(
-      //   username: widget.username,
-      //   onItemSelected: _onDrawerItemSelected,
-      //   onLogout: _logout,
-      //   currentIndex: _currentIndex,
-      // ),
+      appBar: CustomAppBar(title: _getTitle(), showBackButton: false),
       body: PageView(
         controller: _pageController,
         children: _pages,
@@ -109,10 +106,65 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class HomeContent extends StatelessWidget {
+class HomeContent extends StatefulWidget {
   final String username;
+  final VoidCallback? onGoToProducts;
 
-  const HomeContent({super.key, required this.username});
+  const HomeContent({super.key, required this.username, this.onGoToProducts});
+
+  @override
+  State<HomeContent> createState() => _HomeContentState();
+}
+
+class _HomeContentState extends State<HomeContent> {
+  final ProductService _productService = ProductService();
+  List<Product> _products = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    try {
+      final newProducts = await _productService.fetchProducts(
+        limit: 20,
+        offset: 0,
+      );
+      setState(() {
+        newProducts.shuffle();
+        final random = newProducts.take(4).toList();
+        _products.clear();
+        _products.addAll(random);
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error al cargar productos: $e')));
+    }
+  }
+
+  void _onProductTap(Product product) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(product.name),
+        content: Text(
+          "Precio: \$${product.price}\nDescripción breve del producto.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cerrar'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,42 +173,95 @@ class HomeContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Bienvenido, $username!',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 20),
-          const Card(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Icon(Icons.home, size: 50, color: Colors.blue),
-                  SizedBox(height: 10),
-                  Text('Esta es la pantalla de inicio de la aplicación.'),
-                  SizedBox(height: 10),
-                  Text(
-                    'Usa el menu lateral o la barra de navegación inferior para explorar las diferentes secciones.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10), // redondea esquinas
+                image: const DecorationImage(
+                  image: AssetImage('assets/img/images/banner.png'),
+                  fit: BoxFit.fitWidth, // mantiene toda la altura
+                ),
               ),
+              width: double.infinity,
+              height: 220, // mantiene la altura original
             ),
           ),
-          const SizedBox(height: 20),
-          GridView.count(
-            shrinkWrap: true,
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            children: [
-              _buildFeatureCard(Icons.person, 'Perfil', Colors.blue),
-              _buildFeatureCard(Icons.settings, 'Configuración', Colors.green),
-              _buildFeatureCard(Icons.notifications, 'Notificaciones', Colors.orange),
-              _buildFeatureCard(Icons.help, 'Ayuda', Colors.purple),
-            ],
-          )
+          const SizedBox(height: 15),
+
+          // 📂 Categorías
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Categorías",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 15),
+          SizedBox(
+            height: 105,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              children: const [
+                _CategoryItem("assets/img/images/comida.png", "Comida"),
+                _CategoryItem("assets/img/images/accesorios.png", "Accesorios"),
+                _CategoryItem("assets/img/images/limpieza.png", "Limpieza"),
+                _CategoryItem("assets/img/images/salud.png", "Salud"),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 15),
+          // Productos destacados
+          InkWell(
+            onTap: widget.onGoToProducts,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  "Productos",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.purple, // color del círculo
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(
+                    4,
+                  ), // espacio dentro del círculo
+                  child: const Icon(
+                    Icons.arrow_forward, // ícono más moderno
+                    size: 16,
+                    color: Colors.white, // color del ícono
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
+          _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _products.isEmpty
+              ? const Text("No hay productos disponibles.")
+              : SizedBox(
+                  height: 220,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _products.length,
+                    itemBuilder: (context, index) {
+                      final product = _products[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        child: ProductCard(
+                          product: product,
+                          onTap: () => _onProductTap(product),
+                        ),
+                      );
+                    },
+                  ),
+                ),
         ],
       ),
     );
@@ -173,7 +278,7 @@ class HomeContent extends StatelessWidget {
             Icon(icon, size: 50, color: color),
             const SizedBox(height: 10),
             Text(
-              title, 
+              title,
               style: const TextStyle(fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
@@ -183,3 +288,54 @@ class HomeContent extends StatelessWidget {
     );
   }
 }
+
+class _CategoryItem extends StatelessWidget {
+  final String imagePath;
+  final String title;
+
+  const _CategoryItem(this.imagePath, this.title);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 90,
+      margin: const EdgeInsets.symmetric(horizontal: 6),
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 38,
+            backgroundColor: Colors.grey[200],
+            backgroundImage: AssetImage(imagePath),
+          ),
+          const SizedBox(height: 5),
+          Text(title, style: const TextStyle(fontSize: 12)),
+        ],
+      ),
+    );
+  }
+}
+
+Widget _buildDevelopmentPage(String title) {
+    return Scaffold(
+      appBar: CustomAppBar(title: title),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.build, size: 64, color: Colors.grey),
+            const SizedBox(height: 20),
+            Text(
+              '$title - En desarrollo',
+              style: const TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Esta funcionalidad estará disponible pronto',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
