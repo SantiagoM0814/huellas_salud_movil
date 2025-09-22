@@ -1,5 +1,6 @@
 import 'package:huellas_salud_movil/pages/settings/settings.dart';
 import 'package:huellas_salud_movil/pages/products/products.dart';
+import 'package:huellas_salud_movil/pages/notifications/notifications.dart';
 import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import '../../widgets/navigation_drawer.dart';
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
       HomeContent(username: widget.username),
       SettingsScreen(username: widget.username, password: widget.password),
       const ProductHomePage(),
+      const NotificationsScreen(),
       UserScreen(username: widget.username, password: widget.password),
     ];
 } 
@@ -62,14 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: CustomAppBar(
         title: _getTitle(),
         showBackButton: false,
-        onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
+        // onMenuPressed: () => _scaffoldKey.currentState?.openDrawer(),
       ),
-      drawer: CustomDrawer(
-        username: widget.username,
-        onItemSelected: _onDrawerItemSelected,
-        onLogout: _logout,
-        currentIndex: _currentIndex,
-      ),
+      // drawer: CustomDrawer(
+      //   username: widget.username,
+      //   onItemSelected: _onDrawerItemSelected,
+      //   onLogout: _logout,
+      //   currentIndex: _currentIndex,
+      // ),
       body: PageView(
         controller: _pageController,
         children: _pages,
@@ -100,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 2:
         return 'Productos';
       case 3:
-        return 'Mi Aplicación';
+        return 'Notificaciones';
       default:
         return 'Perfil';
     }
