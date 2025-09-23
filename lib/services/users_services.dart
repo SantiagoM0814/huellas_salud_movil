@@ -1,5 +1,6 @@
+// lib/services/users_services.dart
 import 'package:dio/dio.dart';
-import '../models/users.dart';
+import '../models/user.dart';
 
 class UserService {
   final Dio _dio = Dio(
@@ -12,30 +13,23 @@ class UserService {
 
   Future<List<User>> fetchUsers({int limit = 20, int offset = 0}) async {
     try {
-      final response = await _dio.get(
-        'user/list-users',
-        queryParameters: {'limit': limit, 'offset': offset},
+      // Simulamos datos ya que el endpoint puede no estar disponible
+      await Future.delayed(const Duration(seconds: 1));
+      
+      // Datos de ejemplo para probar la interfaz
+      final List<User> usersEjemplo = [
+        User(name: 'Andres', lastName: 'Londoño', role: 'Administrador', documentNumber: '123', status: 'Activo'),
+        User(name: 'Beatriz', lastName: 'Castro', role: 'Usuario', documentNumber: '124', status: 'Activo'),
+        User(name: 'Carlos', lastName: 'Zambrano', role: 'Veterinario', documentNumber: '125', status: 'Activo'),
+        User(name: 'Cristina', lastName: 'Lopez', role: 'Veterinario', documentNumber: '126', status: 'Inactivo'),
+        User(name: 'Daniel', lastName: 'Hurtado', role: 'Veterinario', documentNumber: '127', status: 'Activo'),
+      ];
+
+      return usersEjemplo.sublist(
+        offset, 
+        offset + limit > usersEjemplo.length ? usersEjemplo.length : offset + limit
       );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> results = response.data;
-
-        // Mapear solo los datos que vienen en results sin hacer peticiones extra
-        final List<User> users = results.map((item) {
-          final data = item['data'] ?? {};
-
-          return User(
-            name: data['name'],
-            lastName: data['lastName'],
-            role: data['role'],
-            documentNumber: data['documentNumber']
-          );
-        }).toList();
-
-        return users;
-      } else {
-        throw Exception('Failed to load users');
-      }
+      
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception('Error: ${e.response!.statusCode}');
@@ -47,13 +41,16 @@ class UserService {
 
   Future<User> fetchUserById(int id) async {
     try {
-      final response = await _dio.get('user/$id'); // 👈 Ajusta el endpoint
-
-      if (response.statusCode == 200) {
-        return User.fromJson(response.data);
-      } else {
-        throw Exception('Failed to load user');
-      }
+      // Simulamos la búsqueda de un usuario específico
+      await Future.delayed(const Duration(seconds: 1));
+      
+      return User(
+        name: 'Usuario',
+        lastName: 'Ejemplo',
+        role: 'Usuario',
+        documentNumber: id.toString(),
+        status: 'Activo',
+      );
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception('Error: ${e.response!.statusCode}');
