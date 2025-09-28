@@ -39,11 +39,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _isDarkMode = value;
     });
-    
+   
     // Cambiar el tema globalmente usando Provider
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     themeProvider.setTheme(value ? ThemeMode.dark : ThemeMode.light);
-    
+   
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Tema ${value ? 'oscuro' : 'claro'} activado'),
@@ -139,6 +139,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  // ✅ Widget para las tarjetas de opciones
   Widget _buildFeatureCard(BuildContext context, IconData icon, String title, String description, Color color) {
     return InkWell(
       onTap: () {

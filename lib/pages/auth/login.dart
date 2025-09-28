@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import '../home/home.dart';
 import '../user/form.dart';
+import './recover_password.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,6 +46,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _navigateToRecoverPassword() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RecoverPasswordScreen()),
+    );
+  }
+
   void _login() {
     if (_formKey.currentState!.validate()) {
       final username = _usernameController.text;
@@ -64,86 +72,97 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Iniciar Sesión'),
-      body: Padding(
+      body: SingleChildScrollView( // ✅ Cambiado a SingleChildScrollView
         padding: const EdgeInsets.all(20.0),
         child: Center(
-
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              Image.asset('assets/img/logos/logo.png', height: 150),
-              const SizedBox(height: 5),
-              const Text(
-                'Iniciar Sesión',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _usernameController,
-                decoration: const InputDecoration(
-                  labelText: 'Documento o correo',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(),
+          child: Form(
+            key: _formKey,
+            child: Column( // ✅ Cambiado a Column en lugar de ListView
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset('assets/img/logos/logo.png', height: 150),
+                const SizedBox(height: 5),
+                const Text(
+                  'Iniciar Sesión',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese su documento o correo';
-                  }
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Documento o correo',
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese su documento o correo';
+                    }
 
-                  final emailRegex = RegExp(
-                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                  );
-                  final docRegex = RegExp(r'^[0-9]{6,10}$');
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
+                    final docRegex = RegExp(r'^[0-9]{6,10}$');
 
-                  if (!emailRegex.hasMatch(value) &&
-                      !docRegex.hasMatch(value)) {
-                    return 'Ingrese un correo válido o un documento (solo números)';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(
-                  labelText: 'Contraseña',
-                  prefixIcon: Icon(Icons.lock),
-                  border: OutlineInputBorder(),
+                    if (!emailRegex.hasMatch(value) &&
+                        !docRegex.hasMatch(value)) {
+                      return 'Ingrese un correo válido o un documento (solo números)';
+                    }
+                    return null;
+                  },
                 ),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor ingrese una contraseña';
-                  }
-                  if (!RegExp(
-                    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$',
-                  ).hasMatch(value)) {
-                    return 'Debe tener entre 8 y 16 caracteres,\ncon al menos una mayúscula, una minúscula,\nun número y un carácter especial';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _login,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Contraseña',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese una contraseña';
+                    }
+                    if (!RegExp(
+                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$',
+                    ).hasMatch(value)) {
+                      return 'Debe tener entre 8 y 16 caracteres,\ncon al menos una mayúscula, una minúscula,\nun número y un carácter especial';
+                    }
+                    return null;
+                  },
                 ),
-                child: const Text('Iniciar Sesión'),
-              ),
-              const SizedBox(height: 20),
-              TextButton(
-                onPressed: _navigateToRegister,
-                child: const Text('¿No tienes cuenta? Regístrate aquí'),
-              ),
-            ],
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _login,
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text('Iniciar Sesión'),
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: _navigateToRegister,
+                  child: const Text('¿No tienes cuenta? Regístrate aquí'),
+                ),
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: _navigateToRecoverPassword,
+                  child: const Text('¿Olvidaste tu contraseña?'),
+                ),
+              ],
+            ),
           ),
         ),
-        )
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

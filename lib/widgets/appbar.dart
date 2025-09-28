@@ -4,6 +4,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final List<Widget>? actions;
   final bool showBackButton;
+  final VoidCallback? onBackPressed; // ✅ Nuevo parámetro para callback personalizado
   final VoidCallback? onMenuPressed;
 
   const CustomAppBar({
@@ -11,6 +12,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.actions,
     this.showBackButton = false,
+    this.onBackPressed, // ✅ Recibir callback personalizado
     this.onMenuPressed,
   });
 
@@ -25,20 +27,26 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       automaticallyImplyLeading: showBackButton,
-      leading: showBackButton
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                Navigator.of(context).pop(); // ✅ Esto permite regresar
-              },
-            )
-          : onMenuPressed != null
-               ? IconButton(
-                   icon: const Icon(Icons.menu),
-                   onPressed: onMenuPressed,
-                 )
-               : null,
+      leading: _buildLeading(context),
       actions: actions,
     );
+  }
+
+  Widget? _buildLeading(BuildContext context) {
+    if (showBackButton) {
+      return IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: onBackPressed ?? () {
+          // ✅ Usar callback personalizado o el default
+          Navigator.of(context).pop();
+        },
+      );
+    } else if (onMenuPressed != null) {
+      return IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: onMenuPressed,
+      );
+    }
+    return null;
   }
 }
