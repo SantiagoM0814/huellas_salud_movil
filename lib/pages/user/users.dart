@@ -1,4 +1,3 @@
-// lib/pages/user/users.dart
 import 'package:flutter/material.dart';
 import '../../models/user.dart';
 import '../../services/users_services.dart';
@@ -18,7 +17,7 @@ class _UserHomePageState extends State<UserHomePage> {
   bool _hasMore = true;
   int _offset = 0;
   final int _limit = 20;
-  
+ 
   int _currentFilter = 0;
   String _searchQuery = '';
 
@@ -182,7 +181,7 @@ class _UserHomePageState extends State<UserHomePage> {
                       if (index >= _filteredUsers.length) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      
+                     
                       final user = _filteredUsers[index];
                       return UserListItem(
                         user: user,

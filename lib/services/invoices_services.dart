@@ -14,7 +14,7 @@ class FacturaService {
     try {
       // Simulamos datos ya que no tenemos el endpoint real
       await Future.delayed(const Duration(seconds: 1));
-      
+     
       // Datos de ejemplo (simulando respuesta de API)
       final List<Factura> facturasEjemplo = List.generate(68, (index) {
         final id = 146 - index;
@@ -38,8 +38,8 @@ class FacturaService {
         );
       });
 
-      return facturasEjemplo.sublist(offset, offset + limit > facturasEjemplo.length 
-          ? facturasEjemplo.length 
+      return facturasEjemplo.sublist(offset, offset + limit > facturasEjemplo.length
+          ? facturasEjemplo.length
           : offset + limit);
     } on DioException catch (e) {
       if (e.response != null) {
@@ -54,10 +54,10 @@ class FacturaService {
     try {
       // Simulamos la búsqueda de una factura específica
       await Future.delayed(const Duration(seconds: 1));
-      
+     
       final precios = [689000, 824500, 409200, 371600, 259300, 199000, 462200, 320000];
       final numero = int.parse(id.replaceAll('F-', ''));
-      
+     
       return Factura(
         id: id,
         numero: numero,

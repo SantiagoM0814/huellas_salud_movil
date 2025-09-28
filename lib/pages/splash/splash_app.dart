@@ -23,7 +23,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _animation = CurvedAnimation(
-      parent: _controller, 
+      parent: _controller,
       curve: Curves.easeInOut,
     );
 
@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     Future.delayed(const Duration(seconds: 5), (){
       Navigator.pushReplacement(
-        context, 
+        context,
         MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     });

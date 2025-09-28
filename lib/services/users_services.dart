@@ -1,4 +1,3 @@
-// lib/services/users_services.dart
 import 'package:dio/dio.dart';
 import '../models/user.dart';
 
@@ -15,7 +14,7 @@ class UserService {
     try {
       // Simulamos datos ya que el endpoint puede no estar disponible
       await Future.delayed(const Duration(seconds: 1));
-      
+     
       // Datos de ejemplo para probar la interfaz
       final List<User> usersEjemplo = [
         User(name: 'Andres', lastName: 'Londoño', role: 'Administrador', documentNumber: '123', status: 'Activo'),
@@ -26,10 +25,10 @@ class UserService {
       ];
 
       return usersEjemplo.sublist(
-        offset, 
+        offset,
         offset + limit > usersEjemplo.length ? usersEjemplo.length : offset + limit
       );
-      
+     
     } on DioException catch (e) {
       if (e.response != null) {
         throw Exception('Error: ${e.response!.statusCode}');
@@ -43,7 +42,7 @@ class UserService {
     try {
       // Simulamos la búsqueda de un usuario específico
       await Future.delayed(const Duration(seconds: 1));
-      
+     
       return User(
         name: 'Usuario',
         lastName: 'Ejemplo',

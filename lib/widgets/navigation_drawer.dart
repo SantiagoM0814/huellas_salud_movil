@@ -140,7 +140,7 @@ class CustomDrawer extends StatelessWidget {
   ) {
     return ListTile(
       leading: Icon(
-        icon, 
+        icon,
         color: isSelected ? Theme.of(context).primaryColor : Colors.grey[700]
         ),
         title: Text(

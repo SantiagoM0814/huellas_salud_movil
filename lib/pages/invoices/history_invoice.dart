@@ -33,7 +33,7 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
 
     try {
       final newFacturas = await _facturaService.fetchFacturas(limit: _limit, offset: _offset);
-      
+     
       setState(() {
         if (newFacturas.isEmpty) {
           _hasMore = false;

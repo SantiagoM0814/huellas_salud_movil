@@ -22,11 +22,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title),
       centerTitle: true,
-      backgroundColor: Theme.of( context).primaryColor,
+      backgroundColor: Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       automaticallyImplyLeading: showBackButton,
       leading: showBackButton
-          ? null
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop(); // ✅ Esto permite regresar
+              },
+            )
           : onMenuPressed != null
                ? IconButton(
                    icon: const Icon(Icons.menu),
