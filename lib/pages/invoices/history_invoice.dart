@@ -213,8 +213,6 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Facturas'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [

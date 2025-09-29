@@ -1,3 +1,4 @@
+import 'package:huellas_salud_movil/pages/products/productDetails.dart';
 import 'package:huellas_salud_movil/pages/settings/settings.dart';
 import 'package:huellas_salud_movil/pages/products/products.dart';
 import 'package:huellas_salud_movil/pages/notifications/notifications.dart';
@@ -10,6 +11,7 @@ import '../auth/login.dart';
 import '../../models/products.dart';
 import '../../services/products_services.dart';
 import '../../widgets/productCard.dart';
+import '../products/productDetails.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -149,20 +151,9 @@ class _HomeContentState extends State<HomeContent> {
   }
 
   void _onProductTap(Product product) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(product.name),
-        content: Text(
-          "Precio: \$${product.price}\nDescripción breve del producto.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product),),
     );
   }
 

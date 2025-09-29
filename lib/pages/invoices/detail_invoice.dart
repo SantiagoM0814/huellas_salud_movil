@@ -14,8 +14,6 @@ class DetalleFacturaScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Detalle de Factura'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),

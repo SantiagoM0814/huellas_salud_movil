@@ -4,6 +4,7 @@ import '../../models/products.dart';
 import '../../widgets/appbar.dart';
 import '../../services/products_services.dart';
 import '../../widgets/productList.dart';
+import '../products/productDetails.dart';
 
 class ProductHomePage extends StatefulWidget {
   const ProductHomePage({super.key});
@@ -69,26 +70,15 @@ class _ProductHomePageState extends State<ProductHomePage> {
   }
 
   void _onProductTap(Product product) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(product.name),
-        content: const Text("Aquí podrías mostrar más detalles del producto."),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cerrar'),
-          ),
-        ],
-      ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProductDetailsScreen(product: product),),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          const CustomAppBar(title: 'Lista de Productos', showBackButton: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: _products.isEmpty && _isLoading
