@@ -140,12 +140,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Text('¿olvidaste tu contraseña?'),
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
+              TextButton(
                 onPressed: _navigateToRegister,
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 50),
-                ),
-                child: const Text('Crear cuenta')
+                child: const Text('¿No tienes cuenta? Regístrate aquí')
               ),
             ],
           ),
