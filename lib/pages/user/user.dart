@@ -1,11 +1,13 @@
-// lib/pages/user/user.dart
 import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import './users.dart';
+import './user_products.dart'; // ✅ NUEVA IMPORTACIÓN
 import '../pets/pets.dart';
 import '../invoices/history_invoice.dart';
 import '../settings/settings.dart';
-import '../auth/login.dart'; // ✅ Asegúrate de importar LoginScreen
+import '../auth/login.dart';
+import '../appointments/appointments.dart';
+import '../appointments/agenda_calendar.dart'; // ✅ NUEVA IMPORTACIÓN
 
 class UserScreen extends StatefulWidget {
   final String username;
@@ -73,10 +75,9 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _logout() {
-    // ✅ CORREGIDO: Quitar 'const' del LoginScreen
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()), // ✅ Sin 'const'
+      MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,
     );
 
@@ -170,6 +171,18 @@ class _UserScreenState extends State<UserScreen> {
                   const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.pets, 'Mascotas', const PetHomePage()),
                   const SizedBox(height: 10),
+                 
+                  // ✅ NUEVO BOTÓN DE AGENDA/CALENDARIO
+                  _buildFeatureCard(context, Icons.calendar_today, 'Agenda/Calendario', const AgendaCalendarScreen()),
+                  const SizedBox(height: 10),
+                 
+                  // ✅ NUEVO BOTÓN DE PRODUCTOS
+                  _buildFeatureCard(context, Icons.shopping_bag, 'Productos', const UserProductsScreen()),
+                  const SizedBox(height: 10),
+                  // ✅ NUEVO BOTÓN DE CITAS
+                  _buildFeatureCard(context, Icons.calendar_today, 'Citas', const CitasScreen()),
+                  const SizedBox(height: 10),
+                 
                   _buildFeatureCard(context, Icons.receipt_long, 'Facturas', const HistorialFacturasScreen()),
                   const SizedBox(height: 10),
                   _buildFeatureCard(
