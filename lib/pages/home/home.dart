@@ -13,6 +13,8 @@ import '../../services/products_services.dart';
 import '../../widgets/productCard.dart';
 import '../products/productDetails.dart';
 
+
+
 class HomeScreen extends StatefulWidget {
   final String username;
   final String password;
@@ -103,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
         return 'Notificaciones';
       default:
-        return 'Perfil';
+        return 'Perfil Idiotaaaaa';
     }
   }
 }
