@@ -44,17 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _buildDevelopmentPage("Anuncios"),
       const ProductHomePage(),
       const NotificationsScreen(),
-      UserScreen(
-        username: widget.username, 
-        password: widget.password,
-        onBackPressed: () {
-          // ✅ Cuando presionen back en UserScreen, regresar a la pestaña Inicio
-          setState(() {
-            _currentIndex = 0;
-          });
-          _pageController.jumpToPage(0);
-        },
-      ),
+      UserScreen(username: widget.username, password: widget.password),
     ];
   }
 

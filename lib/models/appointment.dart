@@ -30,24 +30,10 @@ class Cita {
       tipoServicio: data['tipoServicio'] ?? '',
       fecha: DateTime.parse(data['fecha'] ?? DateTime.now().toString()),
       hora: data['hora'] ?? '',
-      estado: data['estado'] ?? 'Pendiente',
+      estado: data['estado'] ?? '',
       veterinario: data['veterinario'] ?? '',
       notas: data['notas'] ?? '',
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'mascotaId': mascotaId,
-      'mascotaNombre': mascotaNombre,
-      'tipoServicio': tipoServicio,
-      'fecha': fecha.toIso8601String(),
-      'hora': hora,
-      'estado': estado,
-      'veterinario': veterinario,
-      'notas': notas,
-    };
   }
 
   Cita copyWith({

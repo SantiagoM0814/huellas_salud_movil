@@ -10,7 +10,6 @@ class CitaService {
     ),
   );
 
-  // Simular datos de citas para demostración
   Future<List<Cita>> fetchCitas({int limit = 20, int offset = 0}) async {
     try {
       // Simulamos delay de red
@@ -51,17 +50,6 @@ class CitaService {
           veterinario: 'Dr. Carlos Rodriguez',
           notas: 'Limpieza dental profesional',
         ),
-        Cita(
-          id: '4',
-          mascotaId: '3',
-          mascotaNombre: 'Rex',
-          tipoServicio: 'Cirugía',
-          fecha: DateTime.now().add(const Duration(days: 7)),
-          hora: '03:00 PM',
-          estado: 'Reprogramada',
-          veterinario: 'Dra. Ana Martinez',
-          notas: 'Castración programada',
-        ),
       ];
 
       return citasEjemplo.sublist(
@@ -81,7 +69,6 @@ class CitaService {
     try {
       await Future.delayed(const Duration(seconds: 1));
       // Simulación de creación exitosa
-      // En una app real, aquí harías la petición POST a tu API
       print('Creando cita para ${cita.mascotaNombre} - ${cita.tipoServicio}');
       return true;
     } on DioException catch (e) {
@@ -92,8 +79,6 @@ class CitaService {
   Future<bool> cancelarCita(String citaId) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
-      // Simulación de cancelación exitosa
-      // En una app real, aquí harías la petición DELETE o PATCH a tu API
       print('Cancelando cita: $citaId');
       return true;
     } on DioException catch (e) {
@@ -104,8 +89,6 @@ class CitaService {
   Future<bool> reprogramarCita(String citaId, DateTime nuevaFecha, String nuevaHora) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
-      // Simulación de reprogramación exitosa
-      // En una app real, aquí harías la petición PUT/PATCH a tu API
       print('Reprogramando cita $citaId para $nuevaFecha a las $nuevaHora');
       return true;
     } on DioException catch (e) {
@@ -113,15 +96,10 @@ class CitaService {
     }
   }
 
-  // Método adicional para obtener una cita por ID
   Future<Cita> fetchCitaById(String id) async {
     try {
-      // Simulamos la búsqueda de una cita específica
       await Future.delayed(const Duration(seconds: 1));
       
-      // En una app real, harías: final response = await _dio.get('citas/$id');
-      
-      // Datos de ejemplo
       return Cita(
         id: id,
         mascotaId: '1',

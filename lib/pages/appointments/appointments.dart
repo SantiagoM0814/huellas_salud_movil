@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
 import '../../services/appointments_services.dart';
 import '../../widgets/appbar.dart';
-import 'create_appointment.dart';
 import 'appointment_detail.dart';
+import 'create_appointment.dart';
 
 class CitasScreen extends StatefulWidget {
   const CitasScreen({super.key});
@@ -96,7 +96,6 @@ class _CitasScreenState extends State<CitasScreen> {
   Future<void> _reprogramarCita(int index) async {
     final cita = _citas[index];
     
-    // Seleccionar nueva fecha
     final DateTime? nuevaFecha = await showDatePicker(
       context: context,
       initialDate: cita.fecha,
@@ -105,17 +104,14 @@ class _CitasScreenState extends State<CitasScreen> {
     );
 
     if (nuevaFecha != null) {
-      // Seleccionar nueva hora
       final TimeOfDay? nuevaHora = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(cita.fecha),
       );
 
       if (nuevaHora != null) {
-        // Formatear la hora
         final horaFormateada = _formatTime(nuevaHora);
         
-        // Mostrar diálogo de confirmación
         final confirmar = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) {
@@ -168,7 +164,6 @@ class _CitasScreenState extends State<CitasScreen> {
     }
   }
 
-  // Método auxiliar para formatear la hora
   String _formatTime(TimeOfDay time) {
     final hour = time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
@@ -179,11 +174,10 @@ class _CitasScreenState extends State<CitasScreen> {
   void _navigateToCreateCita() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CrearCitaScreen()),
+      MaterialPageRoute(builder: (context) => const CrearCitaScreen()), // ✅ Sin const
     );
 
     if (result == true) {
-      // Recargar citas si se creó una nueva
       setState(() {
         _citas.clear();
         _offset = 0;
@@ -197,7 +191,7 @@ class _CitasScreenState extends State<CitasScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetalleCitaScreen(
+        builder: (context) => DetalleCitaScreen( // ✅ Nombre corregido
           cita: cita,
           onCitaUpdated: () {
             setState(() {
@@ -310,7 +304,6 @@ class _CitasScreenState extends State<CitasScreen> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    // ✅ BOTÓN DE REPROGRAMAR
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => _reprogramarCita(index),
@@ -322,7 +315,6 @@ class _CitasScreenState extends State<CitasScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    // BOTÓN DE CANCELAR
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => _cancelarCita(index),
@@ -358,7 +350,6 @@ class _CitasScreenState extends State<CitasScreen> {
       ),
       body: Column(
         children: [
-          // Header informativo
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -391,7 +382,6 @@ class _CitasScreenState extends State<CitasScreen> {
               ],
             ),
           ),
-          // Lista de citas
           Expanded(
             child: _citas.isEmpty && !_isLoading
                 ? const Center(

@@ -6,7 +6,6 @@ class Product {
   final String description;
   final double price;
   final MediaFile? mediaFile;
-  bool isActive; // ✅ NUEVO CAMPO PARA ESTADO
 
   Product({
     required this.idProduct,
@@ -16,7 +15,6 @@ class Product {
     required this.description,
     required this.price,
     this.mediaFile,
-    this.isActive = true, // ✅ Valor por defecto: activo
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -31,7 +29,6 @@ class Product {
       mediaFile: data['mediaFile'] != null
           ? MediaFile.fromJson(data['mediaFile'])
           : null,
-      isActive: data['isActive'] ?? true, // ✅ Leer estado de la API si existe
     );
   }
 }

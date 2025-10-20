@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import '../home/home.dart';
 import '../user/form.dart';
-import './recover_password.dart';
+import './recover_password.dart'; // ✅ Agregar esta importación
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -72,13 +72,13 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(title: 'Iniciar Sesión'),
-      body: SingleChildScrollView( // ✅ Cambiado a SingleChildScrollView
+      body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Center(
           child: Form(
             key: _formKey,
-            child: Column( // ✅ Cambiado a Column en lugar de ListView
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: ListView(
+              shrinkWrap: true,
               children: [
                 Image.asset('assets/img/logos/logo.png', height: 150),
                 const SizedBox(height: 5),
@@ -133,7 +133,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     return null;
                   },
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                // ✅ NUEVO: Enlace para recuperar contraseña
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _navigateToRecoverPassword,
+                    child: const Text('¿Olvidaste tu contraseña?'),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
@@ -146,23 +155,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _navigateToRegister,
                   child: const Text('¿No tienes cuenta? Regístrate aquí'),
                 ),
-                const SizedBox(height: 10),
-                TextButton(
-                  onPressed: _navigateToRecoverPassword,
-                  child: const Text('¿Olvidaste tu contraseña?'),
-                ),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 }

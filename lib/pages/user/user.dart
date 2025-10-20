@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import './users.dart';
-import './user_products.dart'; // ✅ NUEVA IMPORTACIÓN
 import '../pets/pets.dart';
 import '../invoices/history_invoice.dart';
 import '../settings/settings.dart';
-import '../auth/login.dart';
-import '../appointments/appointments.dart';
-import '../appointments/agenda_calendar.dart'; // ✅ NUEVA IMPORTACIÓN
+import '../appointments/appointments.dart'; 
+import '../appointments/agenda.dart'; // ✅ Agregar esta importación
 
 class UserScreen extends StatefulWidget {
   final String username;
   final String password;
-  final VoidCallback? onBackPressed;
 
   const UserScreen({
     super.key,
     required this.username,
     required this.password,
-    this.onBackPressed,
   });
 
   @override
@@ -44,61 +40,10 @@ class _UserScreenState extends State<UserScreen> {
     });
   }
 
-  void _showLogoutConfirmation() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Cerrar Sesión'),
-          content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _logout();
-              },
-              child: const Text(
-                'Cerrar Sesión',
-                style: TextStyle(color: Colors.red),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _logout() {
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
-      (route) => false,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Sesión cerrada exitosamente'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Perfil de usuario',
-        showBackButton: true,
-        onBackPressed: widget.onBackPressed != null
-            ? () => widget.onBackPressed!()
-            : null,
-      ),
+      appBar: const CustomAppBar(title: 'Perfil de usuario', showBackButton: true),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -113,6 +58,7 @@ class _UserScreenState extends State<UserScreen> {
             ),
             const SizedBox(height: 30),
            
+            // BOTÓN PARA MOSTRAR/OCULTAR LA INFORMACIÓN DEL PERFIL
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -128,6 +74,7 @@ class _UserScreenState extends State<UserScreen> {
             ),
             const SizedBox(height: 20),
 
+            // INFORMACIÓN DEL PERFIL (SOLO SE MUESTRA AL PRESIONAR EL BOTÓN)
             if (_showProfileInfo) ...[
               Card(
                 child: Container(
@@ -157,6 +104,7 @@ class _UserScreenState extends State<UserScreen> {
               const SizedBox(height: 20),
             ],
            
+            // Lista de opciones
             const Text(
               'Otras Opciones',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -171,28 +119,31 @@ class _UserScreenState extends State<UserScreen> {
                   const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.pets, 'Mascotas', const PetHomePage()),
                   const SizedBox(height: 10),
-                 
-                  // ✅ NUEVO BOTÓN DE AGENDA/CALENDARIO
-                  _buildFeatureCard(context, Icons.calendar_today, 'Agenda/Calendario', const AgendaCalendarScreen()),
-                  const SizedBox(height: 10),
-                 
-                  // ✅ NUEVO BOTÓN DE PRODUCTOS
-                  _buildFeatureCard(context, Icons.shopping_bag, 'Productos', const UserProductsScreen()),
-                  const SizedBox(height: 10),
-                  // ✅ NUEVO BOTÓN DE CITAS
-                  _buildFeatureCard(context, Icons.calendar_today, 'Citas', const CitasScreen()),
-                  const SizedBox(height: 10),
-                 
                   _buildFeatureCard(context, Icons.receipt_long, 'Facturas', const HistorialFacturasScreen()),
                   const SizedBox(height: 10),
+                  // ✅ BOTÓN DE CITAS (gestión individual)
+                  _buildFeatureCard(
+                    context,
+                    Icons.calendar_today,
+                    'Citas',
+                    const CitasScreen()
+                  ),
+                  const SizedBox(height: 10),
+                  // ✅ NUEVO: BOTÓN DE CALENDARIO (vista general)
+                  _buildFeatureCard(
+                    context,
+                    Icons.calendar_month,
+                    'Calendario',
+                    const AgendaCalendarScreen()
+                  ),
+                  const SizedBox(height: 10),
+                  // CONFIGURACIÓN
                   _buildFeatureCard(
                     context,
                     Icons.settings,
                     'Configuración',
                     SettingsScreen(username: widget.username, password: widget.password)
                   ),
-                  const SizedBox(height: 10),
-                  _buildLogoutCard(),
                 ],
               ),
             )
@@ -225,48 +176,6 @@ class _UserScreenState extends State<UserScreen> {
                 ),
               ),
               const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogoutCard() {
-    return InkWell(
-      onTap: _showLogoutConfirmation,
-      child: Card(
-        elevation: 3,
-        color: Colors.red.withOpacity(0.1),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Icon(Icons.logout, size: 30, color: Colors.red),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Cerrar Sesión',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.red,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Salir de tu cuenta actual',
-                      style: TextStyle(
-                        color: Colors.red.withOpacity(0.7),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.red),
             ],
           ),
         ),
