@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
-import './users.dart';
 import '../pets/pets.dart';
 import '../invoices/history_invoice.dart';
 import '../settings/settings.dart';
-import '../appointments/appointments.dart'; 
+import '../appointments/appointments.dart';
 import '../appointments/agenda.dart'; // ✅ Agregar esta importación
 
 class UserScreen extends StatefulWidget {
@@ -115,8 +114,6 @@ class _UserScreenState extends State<UserScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  _buildFeatureCard(context, Icons.people, 'Usuarios', const UserHomePage()),
-                  const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.pets, 'Mascotas', const PetHomePage()),
                   const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.receipt_long, 'Facturas', const HistorialFacturasScreen()),
