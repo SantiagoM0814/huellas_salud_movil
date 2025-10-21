@@ -12,8 +12,7 @@ import '../../models/products.dart';
 import '../../services/products_services.dart';
 import '../../widgets/productCard.dart';
 import '../products/productDetails.dart';
-
-
+import '../announcements/announcements.dart';
 
 class HomeScreen extends StatefulWidget {
   final String username;
@@ -45,9 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
           _pageController.jumpToPage(2); // 🔹 navega al PageView
         },
       ),
-      _buildDevelopmentPage("Anuncios"),
+      // AnnouncementsPage(username: widget.username),
       const ProductHomePage(),
-      const NotificationsScreen(),
       UserScreen(username: widget.username, password: widget.password),
     ];
   }
@@ -105,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
       case 3:
         return 'Notificaciones';
       default:
-        return 'Perfil Idiotaaaaa';
+        return 'Perfil';
     }
   }
 }
