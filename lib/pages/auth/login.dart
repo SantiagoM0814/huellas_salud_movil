@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import '../home/home.dart';
 import '../user/form.dart';
-import './recover_password.dart'; // ✅ Agregar esta importación
+import './recover_password.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -134,15 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
                 const SizedBox(height: 10),
-                // ✅ NUEVO: Enlace para recuperar contraseña
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _navigateToRecoverPassword,
-                    child: const Text('¿Olvidaste tu contraseña?'),
-                  ),
-                ),
-                const SizedBox(height: 10),
                 ElevatedButton(
                   onPressed: _login,
                   style: ElevatedButton.styleFrom(
@@ -154,6 +145,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 TextButton(
                   onPressed: _navigateToRegister,
                   child: const Text('¿No tienes cuenta? Regístrate aquí'),
+                ),
+                const SizedBox(height: 10),
+                // NUEVO: Enlace para recuperar contraseña
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: _navigateToRecoverPassword,
+                    child: const Text('¿Olvidaste tu contraseña?'),
+                  ),
                 ),
               ],
             ),

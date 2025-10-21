@@ -70,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 20),
            
-            // ✅ Selector de tema
+            // Selector de tema
             _buildThemeSelector(),
             const SizedBox(height: 20),
            
@@ -88,11 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.lock, 'Cambiar contraseña', 'Establece una nueva contraseña segura', Colors.blue),
                   const SizedBox(height: 10),
-                  _buildFeatureCard(context, Icons.language, 'Idioma', 'Seleccione el idioma de la aplicación', Colors.blue),
-                  const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.notifications, 'Notificaciones', 'Configura tus preferencias de notificaciones', Colors.orange),
-                  const SizedBox(height: 10),
-                  _buildFeatureCard(context, Icons.security, 'Privacidad', 'Configura tu privacidad y datos', Colors.green),
                 ],
               )
             )
@@ -102,7 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // ✅ Widget para el selector de tema
+  // Widget para el selector de tema
   Widget _buildThemeSelector() {
     return Card(
       elevation: 3,
