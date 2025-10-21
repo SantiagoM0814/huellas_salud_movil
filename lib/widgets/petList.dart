@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/pets/pet_history.dart';
 import '../../models/pets.dart';
 import './petCard.dart';
 
@@ -46,8 +47,19 @@ class PetList extends StatelessWidget {
                   onTap: () => onPetTap(pet),
                   child: PetCard(
                     pet: pet,
-                    onHistoryTap: () => debugPrint("Historial de ${pet.name}"),
-                    onProcessTap: () => debugPrint("Proceso activo de ${pet.name}"),
+                    onHistoryTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PetHistoryPage(
+                            petId: pet.idPet,
+                            petName: pet.name,
+                          ),
+                        ),
+                      );
+                    },
+                    onProcessTap: () =>
+                        debugPrint("Proceso activo de ${pet.name}"),
                   ),
                 );
               },
