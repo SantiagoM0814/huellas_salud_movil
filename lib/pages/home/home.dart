@@ -11,22 +11,28 @@ import '../../models/products.dart';
 import '../../services/products_services.dart';
 import '../../widgets/productCard.dart';
 
+
 class HomeScreen extends StatefulWidget {
   final String username;
   final String password;
 
+
   const HomeScreen({super.key, required this.username, required this.password});
+
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
+
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   final PageController _pageController = PageController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+
   late List<Widget> _pages;
+
 
   @override
   void initState() {
@@ -48,6 +54,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
   }
 
+
   void _onDrawerItemSelected(int index) {
     setState(() {
       _currentIndex = index;
@@ -56,6 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
     _scaffoldKey.currentState?.closeDrawer();
   }
 
+
   void _logout() {
     Navigator.pushAndRemoveUntil(
       context,
@@ -63,6 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
       (route) => false,
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
   String _getTitle() {
     switch (_currentIndex) {
       case 0:
@@ -106,26 +116,32 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+
 class HomeContent extends StatefulWidget {
   final String username;
   final VoidCallback? onGoToProducts;
 
+
   const HomeContent({super.key, required this.username, this.onGoToProducts});
+
 
   @override
   State<HomeContent> createState() => _HomeContentState();
 }
+
 
 class _HomeContentState extends State<HomeContent> {
   final ProductService _productService = ProductService();
   List<Product> _products = [];
   bool _isLoading = true;
 
+
   @override
   void initState() {
     super.initState();
     _loadProducts();
   }
+
 
   Future<void> _loadProducts() async {
     try {
@@ -148,6 +164,7 @@ class _HomeContentState extends State<HomeContent> {
     }
   }
 
+
   void _onProductTap(Product product) {
     showDialog(
       context: context,
@@ -165,6 +182,7 @@ class _HomeContentState extends State<HomeContent> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -189,6 +207,7 @@ class _HomeContentState extends State<HomeContent> {
           ),
           const SizedBox(height: 15),
 
+
           // 📂 Categorías
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -210,6 +229,7 @@ class _HomeContentState extends State<HomeContent> {
               ],
             ),
           ),
+
 
           const SizedBox(height: 15),
           // Productos destacados
@@ -267,6 +287,7 @@ class _HomeContentState extends State<HomeContent> {
     );
   }
 
+
   Widget _buildFeatureCard(IconData icon, String title, Color color) {
     return Card(
       elevation: 3,
@@ -289,11 +310,14 @@ class _HomeContentState extends State<HomeContent> {
   }
 }
 
+
 class _CategoryItem extends StatelessWidget {
   final String imagePath;
   final String title;
 
+
   const _CategoryItem(this.imagePath, this.title);
+
 
   @override
   Widget build(BuildContext context) {
@@ -314,6 +338,7 @@ class _CategoryItem extends StatelessWidget {
     );
   }
 }
+
 
 Widget _buildDevelopmentPage(String title) {
     return Scaffold(
@@ -338,4 +363,4 @@ Widget _buildDevelopmentPage(String title) {
         ),
       ),
     );
-  }
+}

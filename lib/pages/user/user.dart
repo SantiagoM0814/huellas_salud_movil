@@ -4,7 +4,7 @@ import '../pets/pets.dart';
 import '../invoices/history_invoice.dart';
 import '../settings/settings.dart';
 import '../appointments/appointments.dart';
-import '../appointments/agenda.dart'; // ✅ Agregar esta importación
+import '../appointments/agenda.dart';
 
 class UserScreen extends StatefulWidget {
   final String username;
@@ -22,6 +22,17 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   bool _showProfileInfo = false;
+  late String _currentUsername;
+  late String _currentEmail;
+  late String _currentPassword;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentUsername = widget.username;
+    _currentEmail = '${widget.username}@demo.com';
+    _currentPassword = widget.password;
+  }
 
   Widget _buildInfoRow(String label, String value) {
     return Row(
@@ -39,10 +50,30 @@ class _UserScreenState extends State<UserScreen> {
     });
   }
 
+  void _editProfile() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditProfileDialog(
+          currentUsername: _currentUsername,
+          currentEmail: _currentEmail,
+          currentPassword: _currentPassword,
+          onProfileUpdated: (newUsername, newEmail, newPassword) {
+            setState(() {
+              _currentUsername = newUsername;
+              _currentEmail = newEmail;
+              _currentPassword = newPassword;
+            });
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Perfil de usuario', showBackButton: true),
+      appBar: const CustomAppBar(title: 'Perfil de usuario', showBackButton: false),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -57,16 +88,32 @@ class _UserScreenState extends State<UserScreen> {
             ),
             const SizedBox(height: 30),
            
-            // BOTÓN PARA MOSTRAR/OCULTAR LA INFORMACIÓN DEL PERFIL
+            // BOTÓN PARA EDITAR PERFIL
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _toggleProfileInfo,
-                icon: Icon(_showProfileInfo ? Icons.visibility_off : Icons.edit),
-                label: Text(_showProfileInfo ? 'Ocultar Perfil' : 'Editar Perfil'),
+                onPressed: _editProfile,
+                icon: const Icon(Icons.edit),
+                label: const Text('Editar Perfil'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.purple,
                   foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // BOTÓN PARA MOSTRAR/OCULTAR LA INFORMACIÓN DEL PERFIL
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: _toggleProfileInfo,
+                icon: Icon(_showProfileInfo ? Icons.visibility_off : Icons.visibility),
+                label: Text(_showProfileInfo ? 'Ocultar Perfil' : 'Ver Perfil'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.purple,
+                  side: const BorderSide(color: Colors.purple),
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
               ),
@@ -90,12 +137,12 @@ class _UserScreenState extends State<UserScreen> {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      _buildInfoRow('Usuario:', widget.username),
+                      _buildInfoRow('Usuario:', _currentUsername),
                       const SizedBox(height: 10),
-                      _buildInfoRow('Email:', '${widget.username}@demo.com'),
+                      _buildInfoRow('Email:', _currentEmail),
                       const SizedBox(height: 10),
                       _buildInfoRow('Contraseña:',
-                          '${'*' * widget.password.length} (${widget.password.length} caracteres)'),
+                          '${'*' * _currentPassword.length} (${_currentPassword.length} caracteres)'),
                     ],
                   ),
                 ),
@@ -118,7 +165,6 @@ class _UserScreenState extends State<UserScreen> {
                   const SizedBox(height: 10),
                   _buildFeatureCard(context, Icons.receipt_long, 'Facturas', const HistorialFacturasScreen()),
                   const SizedBox(height: 10),
-                  // ✅ BOTÓN DE CITAS (gestión individual)
                   _buildFeatureCard(
                     context,
                     Icons.calendar_today,
@@ -126,7 +172,6 @@ class _UserScreenState extends State<UserScreen> {
                     const CitasScreen()
                   ),
                   const SizedBox(height: 10),
-                  // ✅ NUEVO: BOTÓN DE CALENDARIO (vista general)
                   _buildFeatureCard(
                     context,
                     Icons.calendar_month,
@@ -134,12 +179,11 @@ class _UserScreenState extends State<UserScreen> {
                     const AgendaCalendarScreen()
                   ),
                   const SizedBox(height: 10),
-                  // CONFIGURACIÓN
                   _buildFeatureCard(
                     context,
                     Icons.settings,
                     'Configuración',
-                    SettingsScreen(username: widget.username, password: widget.password)
+                    SettingsScreen(username: _currentUsername, password: _currentPassword)
                   ),
                 ],
               ),
@@ -178,5 +222,292 @@ class _UserScreenState extends State<UserScreen> {
         ),
       ),
     );
+  }
+}
+
+class EditProfileDialog extends StatefulWidget {
+  final String currentUsername;
+  final String currentEmail;
+  final String currentPassword;
+  final Function(String, String, String) onProfileUpdated;
+
+  const EditProfileDialog({
+    super.key,
+    required this.currentUsername,
+    required this.currentEmail,
+    required this.currentPassword,
+    required this.onProfileUpdated,
+  });
+
+  @override
+  State<EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<EditProfileDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _usernameController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+  late TextEditingController _confirmPasswordController;
+  late TextEditingController _phoneController;
+  late TextEditingController _addressController;
+
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _usernameController = TextEditingController(text: widget.currentUsername);
+    _emailController = TextEditingController(text: widget.currentEmail);
+    _passwordController = TextEditingController(text: widget.currentPassword);
+    _confirmPasswordController = TextEditingController(text: widget.currentPassword);
+    _phoneController = TextEditingController(text: '3001234567');
+    _addressController = TextEditingController(text: 'Calle 123 #45-67');
+  }
+
+  void _saveProfile() {
+    if (_formKey.currentState!.validate()) {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Las contraseñas no coinciden')),
+        );
+        return;
+      }
+
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Simular proceso de guardado
+      Future.delayed(const Duration(seconds: 1), () {
+        setState(() {
+          _isLoading = false;
+        });
+
+        widget.onProfileUpdated(
+          _usernameController.text,
+          _emailController.text,
+          _passwordController.text,
+        );
+
+        Navigator.of(context).pop();
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Perfil actualizado exitosamente'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Center(
+                  child: Text(
+                    'Editar Perfil',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Usuario
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Usuario',
+                    prefixIcon: Icon(Icons.person),
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese su usuario';
+                    }
+                    if (value.length < 3) {
+                      return 'El usuario debe tener al menos 3 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Email
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Correo Electrónico',
+                    prefixIcon: Icon(Icons.email),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese su correo electrónico';
+                    }
+                    if (!RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    ).hasMatch(value)) {
+                      return 'Por favor ingrese un correo electrónico válido';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Teléfono
+                TextFormField(
+                  controller: _phoneController,
+                  decoration: const InputDecoration(
+                    labelText: 'Teléfono',
+                    prefixIcon: Icon(Icons.phone),
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.phone,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese su teléfono';
+                    }
+                    if (value.length < 10) {
+                      return 'El teléfono debe tener al menos 10 caracteres';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Dirección
+                TextFormField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Dirección',
+                    prefixIcon: Icon(Icons.location_on),
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 2,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese su dirección';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Contraseña
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nueva Contraseña',
+                    prefixIcon: Icon(Icons.lock),
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese una contraseña';
+                    }
+                    if (!RegExp(
+                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$',
+                    ).hasMatch(value)) {
+                      return 'Debe tener entre 8 y 16 caracteres,\ncon al menos una mayúscula, una minúscula,\nun número y un carácter especial';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 15),
+
+                // Confirmar Contraseña
+                TextFormField(
+                  controller: _confirmPasswordController,
+                  decoration: const InputDecoration(
+                    labelText: 'Confirmar Contraseña',
+                    prefixIcon: Icon(Icons.lock_clock_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor confirme su contraseña';
+                    }
+                    if (value != _passwordController.text) {
+                      return 'Las contraseñas no coinciden';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 25),
+
+                // Botones
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.purple,
+                          side: const BorderSide(color: Colors.purple),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: const Text('Cancelar'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _saveProfile,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Guardar'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
   }
 }
