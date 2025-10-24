@@ -45,7 +45,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       _buildDevelopmentPage("Anuncios"),
       const ProductHomePage(),
-      const NotificationsScreen(),
       UserScreen(username: widget.username, password: widget.password),
     ];
   }
@@ -100,8 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
         return 'Configuracion';
       case 2:
         return 'Productos';
-      case 3:
-        return 'Notificaciones';
       default:
         return 'Perfil';
     }
