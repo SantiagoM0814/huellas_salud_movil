@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _getTitle() {
     switch (_currentIndex) {
       case 0:
-        return 'Inicioo';
+        return 'Inicio';
       case 1:
         return 'Configuracion';
       case 2:
