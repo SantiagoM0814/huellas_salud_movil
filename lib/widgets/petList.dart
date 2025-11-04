@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../pages/pets/pet_history.dart';
 import '../../models/pets.dart';
 import './petCard.dart';
+
 
 class PetList extends StatelessWidget {
   final List<Pet> pets;
@@ -8,6 +10,7 @@ class PetList extends StatelessWidget {
   final bool isLoading;
   final bool hasMore;
   final VoidCallback? onLoadMore;
+
 
   const PetList({
     super.key,
@@ -17,6 +20,7 @@ class PetList extends StatelessWidget {
     this.hasMore = true,
     this.onLoadMore,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +45,25 @@ class PetList extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
 
+
                 final pet = pets[index];
                 return GestureDetector(
                   onTap: () => onPetTap(pet),
                   child: PetCard(
                     pet: pet,
-                    onHistoryTap: () => debugPrint("Historial de ${pet.name}"),
-                    onProcessTap: () => debugPrint("Proceso activo de ${pet.name}"),
+                    onHistoryTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PetHistoryPage(
+                            petId: pet.idPet,
+                            petName: pet.name,
+                          ),
+                        ),
+                      );
+                    },
+                    onProcessTap: () =>
+                        debugPrint("Proceso activo de ${pet.name}"),
                   ),
                 );
               },

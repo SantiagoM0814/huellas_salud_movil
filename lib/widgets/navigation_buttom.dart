@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 
+
 class BottomNavigation extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+
 
   const BottomNavigation({
     super.key,
     required this.currentIndex,
     required this.onTap,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +34,6 @@ class BottomNavigation extends StatelessWidget {
         BottomNavigationBarItem(
           icon: Icon(Icons.shopping_cart),
           label: 'Productos',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.notifications),
-          label: 'Notificaciones',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),

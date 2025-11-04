@@ -3,11 +3,14 @@ import 'package:intl/intl.dart';
 import 'package:huellas_salud_movil/models/products.dart';
 import 'dart:convert';
 
+
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
 
+
   const ProductCard({super.key, required this.product, required this.onTap});
+
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +64,7 @@ class ProductCard extends StatelessWidget {
     );
   }
 
+
   Widget _buildProductImage(Product product) {
     if (product.mediaFile != null && product.mediaFile!.attachment.isNotEmpty) {
       try {
@@ -81,6 +85,7 @@ class ProductCard extends StatelessWidget {
     return const Icon(Icons.image_not_supported, size: 60, color: Colors.grey);
   }
 }
+
 
 final formatter = NumberFormat.currency(
   locale: 'es_CO', // Español Colombia

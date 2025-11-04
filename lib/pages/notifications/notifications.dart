@@ -3,9 +3,11 @@ import '../../widgets/appbar.dart';
 import '../../widgets/notificationsList.dart';
 import '../../theme/theme_app.dart';
 
+
 /// Pantalla principal que muestra la lista de notificaciones
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +42,12 @@ class NotificationsScreen extends StatelessWidget {
   }
 }
 
+
 /// Tarjeta individual para cada notificación
 class NotificacionCard extends StatelessWidget {
   final Notificacion notificacion;
   const NotificacionCard({super.key, required this.notificacion});
+
 
   @override
   Widget build(BuildContext context) {

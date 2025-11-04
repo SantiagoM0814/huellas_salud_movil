@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import '../../models/pets.dart'; // Asegúrate de importar tu modelo
 
+
 class PetCard extends StatelessWidget {
   final Pet pet;
   final VoidCallback onHistoryTap;
   final VoidCallback onProcessTap;
+
 
   const PetCard({
     super.key,
@@ -13,6 +15,7 @@ class PetCard extends StatelessWidget {
     required this.onHistoryTap,
     required this.onProcessTap,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +45,7 @@ class PetCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
 
+
                 // Información de la mascota
                 Expanded(
                   child: Column(
@@ -63,6 +67,7 @@ class PetCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
+
 
             // Botones de acción
             Row(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class AppTheme {
   // 🎨 Paleta de colores actualizada
   static const Color primaryPurple = Color(0xFF7E57C2);    // 🟣 Primario
@@ -10,6 +11,7 @@ class AppTheme {
   static const Color errorRed = Color(0xFFE57373);          // 🔴 Error
   static const Color textDark = Color(0xFF4A148C);          // ⚫ Texto fuerte
   static const Color textGrey = Color(0xFF888888);          // ⚪ Texto secundario
+
 
   // 🌞 Tema claro
   static ThemeData lightTheme() {
@@ -66,6 +68,7 @@ class AppTheme {
       ),
     );
   }
+
 
   // 🌙 Tema oscuro
   static ThemeData darkTheme() {

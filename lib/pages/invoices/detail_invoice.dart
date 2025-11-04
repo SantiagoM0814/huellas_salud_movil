@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../models/invoice.dart';
 
+
 class DetalleFacturaScreen extends StatelessWidget {
   final Factura factura;
 
+
   const DetalleFacturaScreen({Key? key, required this.factura}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
     final iva = factura.monto * 0.19;
     final subtotal = factura.monto - iva - factura.envio;
 
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Detalle de Factura'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
@@ -73,6 +75,7 @@ class DetalleFacturaScreen extends StatelessWidget {
     );
   }
 
+
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4),
@@ -85,6 +88,7 @@ class DetalleFacturaScreen extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildItemRow(ItemFactura item) {
     return Padding(
@@ -112,6 +116,7 @@ class DetalleFacturaScreen extends StatelessWidget {
     );
   }
 
+
   Widget _buildTotalRow(String label, double value, {bool isFree = false, bool isTotal = false}) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4),
@@ -131,10 +136,12 @@ class DetalleFacturaScreen extends StatelessWidget {
     );
   }
 
+
   String _formatPrice(double price) {
     return price.toStringAsFixed(0).replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
   }
+
 
   Color _getColorByEstado(String estado) {
     switch (estado) {

@@ -3,12 +3,15 @@ import '../../models/pets.dart';
 import '../../services/pets_services.dart';
 import '../../widgets/petList.dart';
 
+
 class PetHomePage extends StatefulWidget {
   const PetHomePage({super.key});
+
 
   @override
   State<PetHomePage> createState() => _PetHomePageState();
 }
+
 
 class _PetHomePageState extends State<PetHomePage> {
   final PetService _petService = PetService();
@@ -18,16 +21,20 @@ class _PetHomePageState extends State<PetHomePage> {
   int _offset = 0;
   final int _limit = 20;
 
+
   @override
   void initState() {
     super.initState();
     _loadPets();
   }
 
+
   Future<void> _loadPets() async {
     if (_isLoading || !_hasMore) return;
 
+
     setState(() => _isLoading = true);
+
 
     try {
       final newPets = await _petService.fetchPet(limit: _limit, offset: _offset);
@@ -50,6 +57,7 @@ class _PetHomePageState extends State<PetHomePage> {
     }
   }
 
+
   void _onPetTap(Pet pet) {
     showDialog(
       context: context,
@@ -65,6 +73,7 @@ class _PetHomePageState extends State<PetHomePage> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

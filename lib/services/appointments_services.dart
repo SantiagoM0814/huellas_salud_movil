@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/appointment.dart';
 
+
 class CitaService {
   final Dio _dio = Dio(
     BaseOptions(
@@ -10,10 +11,12 @@ class CitaService {
     ),
   );
 
+
   Future<List<Cita>> fetchCitas({int limit = 20, int offset = 0}) async {
     try {
       // Simulamos delay de red
       await Future.delayed(const Duration(seconds: 1));
+
 
       // Datos de ejemplo
       final List<Cita> citasEjemplo = [
@@ -52,6 +55,7 @@ class CitaService {
         ),
       ];
 
+
       return citasEjemplo.sublist(
         offset,
         offset + limit > citasEjemplo.length ? citasEjemplo.length : offset + limit,
@@ -65,6 +69,7 @@ class CitaService {
     }
   }
 
+
   Future<bool> crearCita(Cita cita) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -76,6 +81,7 @@ class CitaService {
     }
   }
 
+
   Future<bool> cancelarCita(String citaId) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
@@ -85,6 +91,7 @@ class CitaService {
       throw Exception('Error al cancelar cita: ${e.message}');
     }
   }
+
 
   Future<bool> reprogramarCita(String citaId, DateTime nuevaFecha, String nuevaHora) async {
     try {
@@ -96,10 +103,11 @@ class CitaService {
     }
   }
 
+
   Future<Cita> fetchCitaById(String id) async {
     try {
       await Future.delayed(const Duration(seconds: 1));
-      
+     
       return Cita(
         id: id,
         mascotaId: '1',

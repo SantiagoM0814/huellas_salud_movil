@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/products.dart';
 
+
 class ProductService {
   final Dio _dio = Dio(
     BaseOptions(
@@ -10,6 +11,7 @@ class ProductService {
     ),
   );
 
+
   Future<List<Product>> fetchProducts({int limit = 20, int offset = 0}) async {
     try {
       final response = await _dio.get(
@@ -17,12 +19,15 @@ class ProductService {
         queryParameters: {'limit': limit, 'offset': offset},
       );
 
+
       if (response.statusCode == 200) {
         final List<dynamic> results = response.data;
+
 
         // Mapear solo los datos que vienen en results sin hacer peticiones extra
         final List<Product> products = results.map((item) {
           final data = item['data'] ?? {};
+
 
           MediaFile? mediaFile;
           if (data['mediaFile'] != null) {
@@ -33,6 +38,7 @@ class ProductService {
               attachment: mf['attachment'] ?? '',
             );
           }
+
 
           return Product(
             idProduct: data['idProduct']
@@ -45,6 +51,7 @@ class ProductService {
             mediaFile: mediaFile,
           );
         }).toList();
+
 
         return products;
       } else {
@@ -59,9 +66,11 @@ class ProductService {
     }
   }
 
+
   Future<Product> fetchProductById(int id) async {
     try {
       final response = await _dio.get('products/$id'); // 👈 Ajusta el endpoint
+
 
       if (response.statusCode == 200) {
         return Product.fromJson(response.data);

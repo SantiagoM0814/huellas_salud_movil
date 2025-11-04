@@ -1,38 +1,55 @@
 import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
+import './users.dart';
 import '../pets/pets.dart';
 import '../invoices/history_invoice.dart';
-import '../settings/settings.dart';
+import '../auth/login.dart';
 import '../appointments/appointments.dart';
 import '../appointments/agenda.dart';
+import '../settings/settings.dart';
+
 
 class UserScreen extends StatefulWidget {
   final String username;
   final String password;
 
-  const UserScreen({
-    super.key,
-    required this.username,
-    required this.password,
-  });
+
+  const UserScreen({super.key, required this.username, required this.password});
+
 
   @override
   State<UserScreen> createState() => _UserScreenState();
 }
 
-class _UserScreenState extends State<UserScreen> {
-  bool _showProfileInfo = false;
-  late String _currentUsername;
-  late String _currentEmail;
-  late String _currentPassword;
 
-  @override
-  void initState() {
-    super.initState();
-    _currentUsername = widget.username;
-    _currentEmail = '${widget.username}@demo.com';
-    _currentPassword = widget.password;
+class _UserScreenState extends State<UserScreen> {
+  bool _showProfileInfo = true;
+ 
+  void _toggleProfileInfo() {
+    setState(() {
+      _showProfileInfo = !_showProfileInfo;
+    });
   }
+
+
+  void _editProfile() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return EditProfileDialog(
+          username: widget.username,
+          password: widget.password,
+          onProfileUpdated: () {
+            // Aquí puedes agregar lógica para actualizar el perfil si es necesario
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Perfil actualizado exitosamente')),
+            );
+          },
+        );
+      },
+    );
+  }
+
 
   Widget _buildInfoRow(String label, String value) {
     return Row(
@@ -44,36 +61,54 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
-  void _toggleProfileInfo() {
-    setState(() {
-      _showProfileInfo = !_showProfileInfo;
-    });
-  }
 
-  void _editProfile() {
+  void _showLogoutConfirmation(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return EditProfileDialog(
-          currentUsername: _currentUsername,
-          currentEmail: _currentEmail,
-          currentPassword: _currentPassword,
-          onProfileUpdated: (newUsername, newEmail, newPassword) {
-            setState(() {
-              _currentUsername = newUsername;
-              _currentEmail = newEmail;
-              _currentPassword = newPassword;
-            });
-          },
+        return AlertDialog(
+          title: const Text('Cerrar Sesión'),
+          content: const Text('¿Estás seguro de que deseas cerrar sesión?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logout(context);
+              },
+              child: const Text(
+                'Cerrar Sesión',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
         );
       },
     );
   }
 
+
+  void _logout(BuildContext context) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Sesión cerrada exitosamente'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Perfil de usuario', showBackButton: false),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -86,115 +121,119 @@ class _UserScreenState extends State<UserScreen> {
                 child: Icon(Icons.person, size: 70, color: Colors.white),
               ),
             ),
-            const SizedBox(height: 30),
            
-            // BOTÓN PARA EDITAR PERFIL
+            // Botón "Editar Perfil"
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _editProfile,
                 icon: const Icon(Icons.edit),
                 label: const Text('Editar Perfil'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.purple,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
               ),
             ),
-            const SizedBox(height: 20),
-
-            // BOTÓN PARA MOSTRAR/OCULTAR LA INFORMACIÓN DEL PERFIL
+            const SizedBox(height: 10),
+           
+            // Botón "Ver Perfil" / "Ocultar Perfil"
             SizedBox(
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: _toggleProfileInfo,
                 icon: Icon(_showProfileInfo ? Icons.visibility_off : Icons.visibility),
                 label: Text(_showProfileInfo ? 'Ocultar Perfil' : 'Ver Perfil'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.purple,
-                  side: const BorderSide(color: Colors.purple),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                ),
               ),
             ),
             const SizedBox(height: 20),
 
-            // INFORMACIÓN DEL PERFIL (SOLO SE MUESTRA AL PRESIONAR EL BOTÓN)
+
+            // Información del perfil (condicional)
             if (_showProfileInfo) ...[
               Card(
-                child: Container(
-                  width: double.infinity,
+                child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     children: [
-                      const Text(
-                        'Mi Perfil',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.purple,
-                        ),
+                      _buildInfoRow('Usuario:', widget.username),
+                      const SizedBox(height: 15),
+                      _buildInfoRow('Email:', '${widget.username}@demo.com'),
+                      const SizedBox(height: 15),
+                      _buildInfoRow(
+                        'Contraseña:',
+                        '${'*' * widget.password.length} (${widget.password.length} caracteres)',
                       ),
-                      const SizedBox(height: 10),
-                      _buildInfoRow('Usuario:', _currentUsername),
-                      const SizedBox(height: 10),
-                      _buildInfoRow('Email:', _currentEmail),
-                      const SizedBox(height: 10),
-                      _buildInfoRow('Contraseña:',
-                          '${'*' * _currentPassword.length} (${_currentPassword.length} caracteres)'),
+                      const SizedBox(height: 15),
+                      _buildInfoRow('Teléfono:', '+57 300 123 4567'),
+                      const SizedBox(height: 15),
+                      _buildInfoRow('Dirección:', 'Calle 123 #45-67, Ciudad'),
                     ],
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
             ],
-           
-            // Lista de opciones
-            const Text(
-              'Otras Opciones',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
            
             Expanded(
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  _buildFeatureCard(context, Icons.pets, 'Mascotas', const PetHomePage()),
+                  _buildFeatureCard(
+                    context,
+                    Icons.person,
+                    'Usuarios',
+                    const UserHomePage(),
+                  ),
                   const SizedBox(height: 10),
-                  _buildFeatureCard(context, Icons.receipt_long, 'Facturas', const HistorialFacturasScreen()),
+                  _buildFeatureCard(
+                    context,
+                    Icons.pets,
+                    'Mascotas',
+                    const PetHomePage(),
+                  ),
+                  const SizedBox(height: 10),
+                  _buildFeatureCard(
+                    context,
+                    Icons.receipt_long,
+                    'Facturas',
+                    const HistorialFacturasScreen(),
+                  ),
                   const SizedBox(height: 10),
                   _buildFeatureCard(
                     context,
                     Icons.calendar_today,
                     'Citas',
-                    const CitasScreen()
+                    const CitasScreen(),
                   ),
                   const SizedBox(height: 10),
                   _buildFeatureCard(
                     context,
                     Icons.calendar_month,
                     'Calendario',
-                    const AgendaCalendarScreen()
+                    const AgendaCalendarScreen(),
                   ),
                   const SizedBox(height: 10),
                   _buildFeatureCard(
                     context,
                     Icons.settings,
                     'Configuración',
-                    SettingsScreen(username: _currentUsername, password: _currentPassword)
+                    SettingsScreen(username: widget.username, password: widget.password),
                   ),
+                  const SizedBox(height: 10),
+                  _buildLogoutCard(context),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFeatureCard(BuildContext context, IconData icon, String title, Widget destinationPage) {
+
+  Widget _buildFeatureCard(
+    BuildContext context,
+    IconData icon,
+    String title,
+    Widget destinationPage,
+  ) {
     return InkWell(
       onTap: () {
         Navigator.push(
@@ -207,16 +246,53 @@ class _UserScreenState extends State<UserScreen> {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 30, color: Colors.purple),
+              Icon(icon, size: 30),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+              const Icon(Icons.arrow_forward_ios, size: 10, color: Colors.grey),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget _buildLogoutCard(BuildContext context) {
+    return InkWell(
+      onTap: () => _showLogoutConfirmation(context),
+      child: Card(
+        elevation: 3,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              const Icon(Icons.logout, size: 30, color: Colors.red),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'Cerrar Sesión',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -225,45 +301,57 @@ class _UserScreenState extends State<UserScreen> {
   }
 }
 
+
+// Diálogo para editar perfil
 class EditProfileDialog extends StatefulWidget {
-  final String currentUsername;
-  final String currentEmail;
-  final String currentPassword;
-  final Function(String, String, String) onProfileUpdated;
+  final String username;
+  final String password;
+  final VoidCallback onProfileUpdated;
+
 
   const EditProfileDialog({
     super.key,
-    required this.currentUsername,
-    required this.currentEmail,
-    required this.currentPassword,
+    required this.username,
+    required this.password,
     required this.onProfileUpdated,
   });
+
 
   @override
   State<EditProfileDialog> createState() => _EditProfileDialogState();
 }
 
+
 class _EditProfileDialogState extends State<EditProfileDialog> {
   final _formKey = GlobalKey<FormState>();
-  late TextEditingController _usernameController;
-  late TextEditingController _emailController;
-  late TextEditingController _passwordController;
-  late TextEditingController _confirmPasswordController;
-  late TextEditingController _phoneController;
-  late TextEditingController _addressController;
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
 
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _usernameController = TextEditingController(text: widget.currentUsername);
-    _emailController = TextEditingController(text: widget.currentEmail);
-    _passwordController = TextEditingController(text: widget.currentPassword);
-    _confirmPasswordController = TextEditingController(text: widget.currentPassword);
-    _phoneController = TextEditingController(text: '3001234567');
-    _addressController = TextEditingController(text: 'Calle 123 #45-67');
+    // Inicializar controladores con datos actuales
+    _usernameController.text = widget.username;
+    _phoneController.text = '+57 300 123 4567';
+    _addressController.text = 'Calle 123 #45-67, Ciudad';
+    _passwordController.text = widget.password;
   }
+
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
 
   void _saveProfile() {
     if (_formKey.currentState!.validate()) {
@@ -274,240 +362,118 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         return;
       }
 
-      setState(() {
-        _isLoading = true;
-      });
 
-      // Simular proceso de guardado
-      Future.delayed(const Duration(seconds: 1), () {
-        setState(() {
-          _isLoading = false;
-        });
-
-        widget.onProfileUpdated(
-          _usernameController.text,
-          _emailController.text,
-          _passwordController.text,
-        );
-
-        Navigator.of(context).pop();
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Perfil actualizado exitosamente'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      });
+      // Aquí iría la lógica para guardar los cambios en la base de datos
+      widget.onProfileUpdated();
+      Navigator.of(context).pop();
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Center(
-                  child: Text(
-                    'Editar Perfil',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                    ),
-                  ),
+    return AlertDialog(
+      title: const Text('Editar Perfil'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: _usernameController,
+                decoration: const InputDecoration(
+                  labelText: 'Usuario',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 20),
-
-                // Usuario
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Usuario',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingrese su usuario';
-                    }
-                    if (value.length < 3) {
-                      return 'El usuario debe tener al menos 3 caracteres';
-                    }
-                    return null;
-                  },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su usuario';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Teléfono',
+                  prefixIcon: Icon(Icons.phone),
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 15),
-
-                // Email
-                TextFormField(
-                  controller: _emailController,
-                  decoration: const InputDecoration(
-                    labelText: 'Correo Electrónico',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingrese su correo electrónico';
-                    }
-                    if (!RegExp(
-                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                    ).hasMatch(value)) {
-                      return 'Por favor ingrese un correo electrónico válido';
-                    }
-                    return null;
-                  },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su teléfono';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: _addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Dirección',
+                  prefixIcon: Icon(Icons.location_on),
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 15),
-
-                // Teléfono
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: const InputDecoration(
-                    labelText: 'Teléfono',
-                    prefixIcon: Icon(Icons.phone),
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingrese su teléfono';
-                    }
-                    if (value.length < 10) {
-                      return 'El teléfono debe tener al menos 10 caracteres';
-                    }
-                    return null;
-                  },
+                maxLines: 2,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese su dirección';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: _passwordController,
+                decoration: const InputDecoration(
+                  labelText: 'Nueva Contraseña',
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 15),
-
-                // Dirección
-                TextFormField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Dirección',
-                    prefixIcon: Icon(Icons.location_on),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingrese su dirección';
-                    }
-                    return null;
-                  },
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor ingrese una contraseña';
+                  }
+                  if (value.length < 6) {
+                    return 'La contraseña debe tener al menos 6 caracteres';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: _confirmPasswordController,
+                decoration: const InputDecoration(
+                  labelText: 'Confirmar Contraseña',
+                  prefixIcon: Icon(Icons.lock_clock_outlined),
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 15),
-
-                // Contraseña
-                TextFormField(
-                  controller: _passwordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Nueva Contraseña',
-                    prefixIcon: Icon(Icons.lock),
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingrese una contraseña';
-                    }
-                    if (!RegExp(
-                      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$',
-                    ).hasMatch(value)) {
-                      return 'Debe tener entre 8 y 16 caracteres,\ncon al menos una mayúscula, una minúscula,\nun número y un carácter especial';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 15),
-
-                // Confirmar Contraseña
-                TextFormField(
-                  controller: _confirmPasswordController,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirmar Contraseña',
-                    prefixIcon: Icon(Icons.lock_clock_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor confirme su contraseña';
-                    }
-                    if (value != _passwordController.text) {
-                      return 'Las contraseñas no coinciden';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 25),
-
-                // Botones
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.purple,
-                          side: const BorderSide(color: Colors.purple),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: const Text('Cancelar'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _saveProfile,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text('Guardar'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Por favor confirme su contraseña';
+                  }
+                  return null;
+                },
+              ),
+            ],
           ),
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancelar'),
+        ),
+        ElevatedButton(
+          onPressed: _saveProfile,
+          child: const Text('Guardar'),
+        ),
+      ],
     );
-  }
-
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _phoneController.dispose();
-    _addressController.dispose();
-    super.dispose();
   }
 }

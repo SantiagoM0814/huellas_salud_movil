@@ -3,9 +3,11 @@ import '../../models/appointment.dart';
 import '../../services/appointments_services.dart';
 import '../../widgets/appbar.dart';
 
+
 class DetalleCitaScreen extends StatefulWidget {
   final Cita cita;
   final VoidCallback onCitaUpdated;
+
 
   const DetalleCitaScreen({
     super.key,
@@ -13,20 +15,24 @@ class DetalleCitaScreen extends StatefulWidget {
     required this.onCitaUpdated,
   });
 
+
   @override
   State<DetalleCitaScreen> createState() => _DetalleCitaScreenState();
 }
+
 
 class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
   final CitaService _citaService = CitaService();
   late Cita _cita;
   bool _isLoading = false;
 
+
   @override
   void initState() {
     super.initState();
     _cita = widget.cita;
   }
+
 
   Future<void> _cancelarCita() async {
     showDialog(
@@ -44,7 +50,7 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 setState(() => _isLoading = true);
-                
+               
                 try {
                   final success = await _citaService.cancelarCita(_cita.id);
                   if (success) {
@@ -72,6 +78,7 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
     );
   }
 
+
   Future<void> _reprogramarCita() async {
     final DateTime? nuevaFecha = await showDatePicker(
       context: context,
@@ -80,21 +87,24 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
       lastDate: DateTime(2100),
     );
 
+
     if (nuevaFecha != null) {
       final TimeOfDay? nuevaHora = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_cita.fecha),
       );
 
+
       if (nuevaHora != null) {
         setState(() => _isLoading = true);
-        
+       
         try {
           final success = await _citaService.reprogramarCita(
             _cita.id,
             nuevaFecha,
             '${nuevaHora.hour}:${nuevaHora.minute.toString().padLeft(2, '0')}',
           );
+
 
           if (success) {
             setState(() {
@@ -120,6 +130,7 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
     }
   }
 
+
   Color _getColorByEstado(String estado) {
     switch (estado) {
       case 'Confirmada':
@@ -139,9 +150,11 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
     }
   }
 
+
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
+
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
@@ -161,6 +174,7 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -197,6 +211,7 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
                   ),
                   const SizedBox(height: 30),
 
+
                   // Información de la cita
                   Card(
                     elevation: 3,
@@ -219,13 +234,14 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
                           _buildInfoRow('Fecha:', _formatDate(_cita.fecha)),
                           _buildInfoRow('Hora:', _cita.hora),
                           _buildInfoRow('Veterinario:', _cita.veterinario),
-                          if (_cita.notas.isNotEmpty) 
+                          if (_cita.notas.isNotEmpty)
                             _buildInfoRow('Notas:', _cita.notas),
                         ],
                       ),
                     ),
                   ),
                   const SizedBox(height: 30),
+
 
                   // Botones de acción
                   if (_cita.estado != 'Cancelada' && _cita.estado != 'Completada') ...[
@@ -258,7 +274,8 @@ class _DetalleCitaScreenState extends State<DetalleCitaScreen> {
                     ),
                   ],
 
-                  if (_cita.estado == 'Cancelada') 
+
+                  if (_cita.estado == 'Cancelada')
                     const Center(
                       child: Text(
                         'Esta cita ha sido cancelada',

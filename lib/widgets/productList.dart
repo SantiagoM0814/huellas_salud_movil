@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import '../models/products.dart';
 import 'productCard.dart';
 
+
 class ProductList extends StatelessWidget {
   final List<Product> products;
   final Function(Product) onProductTap;
   final bool isLoading;
   final bool hasMore;
   final VoidCallback? onLoadMore;
+
 
   const ProductList({
     super.key,
@@ -17,6 +19,7 @@ class ProductList extends StatelessWidget {
     this.hasMore = true,
     this.onLoadMore,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +50,7 @@ class ProductList extends StatelessWidget {
                 if (index == products.length) {
                   return const Center(child: CircularProgressIndicator());
                 }
+
 
                 final product = products[index];
                 return ProductCard(

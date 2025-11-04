@@ -5,12 +5,15 @@ import '../../widgets/appbar.dart';
 import 'appointment_detail.dart';
 import 'create_appointment.dart';
 
+
 class CitasScreen extends StatefulWidget {
   const CitasScreen({super.key});
+
 
   @override
   State<CitasScreen> createState() => _CitasScreenState();
 }
+
 
 class _CitasScreenState extends State<CitasScreen> {
   final CitaService _citaService = CitaService();
@@ -20,16 +23,20 @@ class _CitasScreenState extends State<CitasScreen> {
   int _offset = 0;
   final int _limit = 20;
 
+
   @override
   void initState() {
     super.initState();
     _loadCitas();
   }
 
+
   Future<void> _loadCitas() async {
     if (_isLoading || !_hasMore) return;
 
+
     setState(() => _isLoading = true);
+
 
     try {
       final newCitas = await _citaService.fetchCitas(limit: _limit, offset: _offset);
@@ -52,9 +59,10 @@ class _CitasScreenState extends State<CitasScreen> {
     }
   }
 
+
   Future<void> _cancelarCita(int index) async {
     final cita = _citas[index];
-    
+   
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -93,9 +101,10 @@ class _CitasScreenState extends State<CitasScreen> {
     );
   }
 
+
   Future<void> _reprogramarCita(int index) async {
     final cita = _citas[index];
-    
+   
     final DateTime? nuevaFecha = await showDatePicker(
       context: context,
       initialDate: cita.fecha,
@@ -103,15 +112,17 @@ class _CitasScreenState extends State<CitasScreen> {
       lastDate: DateTime(2100),
     );
 
+
     if (nuevaFecha != null) {
       final TimeOfDay? nuevaHora = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(cita.fecha),
       );
 
+
       if (nuevaHora != null) {
         final horaFormateada = _formatTime(nuevaHora);
-        
+       
         final confirmar = await showDialog<bool>(
           context: context,
           builder: (BuildContext context) {
@@ -134,6 +145,7 @@ class _CitasScreenState extends State<CitasScreen> {
           },
         );
 
+
         if (confirmar == true) {
           try {
             final success = await _citaService.reprogramarCita(
@@ -141,7 +153,7 @@ class _CitasScreenState extends State<CitasScreen> {
               nuevaFecha,
               horaFormateada,
             );
-            
+           
             if (success) {
               setState(() {
                 _citas[index] = cita.copyWith(
@@ -164,6 +176,7 @@ class _CitasScreenState extends State<CitasScreen> {
     }
   }
 
+
   String _formatTime(TimeOfDay time) {
     final hour = time.hourOfPeriod;
     final minute = time.minute.toString().padLeft(2, '0');
@@ -171,11 +184,13 @@ class _CitasScreenState extends State<CitasScreen> {
     return '$hour:$minute $period';
   }
 
+
   void _navigateToCreateCita() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CrearCitaScreen()), // ✅ Sin const
+      MaterialPageRoute(builder: (context) => const CrearCitaScreen()),
     );
+
 
     if (result == true) {
       setState(() {
@@ -187,11 +202,12 @@ class _CitasScreenState extends State<CitasScreen> {
     }
   }
 
+
   void _verDetalleCita(Cita cita) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DetalleCitaScreen( // ✅ Nombre corregido
+        builder: (context) => DetalleCitaScreen(
           cita: cita,
           onCitaUpdated: () {
             setState(() {
@@ -205,6 +221,7 @@ class _CitasScreenState extends State<CitasScreen> {
       ),
     );
   }
+
 
   Color _getColorByEstado(String estado) {
     switch (estado) {
@@ -225,9 +242,11 @@ class _CitasScreenState extends State<CitasScreen> {
     }
   }
 
+
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
+
 
   Widget _buildCitaCard(Cita cita, int index) {
     return Card(
@@ -334,6 +353,7 @@ class _CitasScreenState extends State<CitasScreen> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {

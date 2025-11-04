@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import '../auth/login.dart';
 
+
 class UserFormScreen extends StatefulWidget {
   const UserFormScreen({super.key});
+
 
   @override
   State<UserFormScreen> createState() => _UserFormScreenState();
 }
+
 
 class _UserFormScreenState extends State<UserFormScreen> {
   final _formKey = GlobalKey<FormState>();
@@ -21,12 +24,14 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+
   void _navigationLogin() async {
     final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => const LoginScreen())
     );
   }
+
 
   void _register() {
     if (_formKey.currentState!.validate()) {
@@ -36,6 +41,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         );
         return;
       }
+
 
       showDialog(
         context: context,
@@ -47,6 +53,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
+
 
                   _formKey.currentState!.reset();
                   _nameController.clear();
@@ -67,6 +74,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         },
       );
 
+
       final userData = {
         'name': _nameController.text,
         'lasName': _lastNameController.text,
@@ -76,6 +84,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
         'phone': _phoneController.text,
         'password': _passwordController.text,
       };
+
 
       Navigator.pop(context, userData);
     } else {
@@ -90,18 +99,22 @@ class _UserFormScreenState extends State<UserFormScreen> {
     }
   }
 
+
   void _cancel() {
     Navigator.pop(context);
   }
 
+
   String _selectedDocumentT = 'Cédula de ciudadania';
   bool _acceptTerms = false;
+
 
   final List<String> _tDocument = [
     'Cédula de ciudadania',
     'Cédula de extranjeria',
     'Tarjeta de identidad',
   ];
+
 
   @override
   Widget build(BuildContext context) {
@@ -137,6 +150,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               ),
               const SizedBox(height: 20),
 
+
               TextFormField(
                 controller: _lastNameController,
                 decoration: const InputDecoration(
@@ -154,6 +168,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 },
               ),
               const SizedBox(height: 20),
+
 
               DropdownButtonFormField<String>(
                 value: _selectedDocumentT,
@@ -175,6 +190,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               ),
               const SizedBox(height: 20),
 
+
               TextFormField(
                 controller: _documentController,
                 decoration: const InputDecoration(
@@ -192,6 +208,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 },
               ),
               const SizedBox(height: 20),
+
 
               TextFormField(
                 controller: _emailController,
@@ -215,6 +232,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               ),
               const SizedBox(height: 20),
 
+
               TextFormField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
@@ -232,6 +250,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 },
               ),
               const SizedBox(height: 20),
+
 
               TextFormField(
                 controller: _addressController,
@@ -254,6 +273,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 },
               ),
               const SizedBox(height: 20),
+
 
               TextFormField(
                 controller: _passwordController,
@@ -296,6 +316,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               ),
               const SizedBox(height: 30),
 
+
               Row(
                 children: [
                   Checkbox(
@@ -321,6 +342,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
               ),
               const SizedBox(height: 30),
 
+
               ElevatedButton(
                 onPressed: _acceptTerms ? _register : null,
                 style: ElevatedButton.styleFrom(
@@ -336,6 +358,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -353,6 +376,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
       ),
     );
   }
+
 
   void _showTermsDialog() {
     showDialog(

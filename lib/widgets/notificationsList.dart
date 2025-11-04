@@ -7,6 +7,7 @@ class Notificacion {
   final String hora;
   final String? emoji;
 
+
   const Notificacion({
     required this.icon,
     required this.mensaje,
@@ -14,6 +15,7 @@ class Notificacion {
     this.emoji,
   });
 }
+
 
 /// Lista de notificaciones de ejemplo
 const List<Notificacion> notificaciones = [

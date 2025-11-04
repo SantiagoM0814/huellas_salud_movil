@@ -4,9 +4,15 @@ import '../../widgets/appbar.dart';
 import '../../theme/theme_app.dart';
 import '../../theme/theme_provider.dart';
 
+
+
+
 class SettingsScreen extends StatefulWidget {
   final String username;
   final String password;
+
+
+
 
   const SettingsScreen({
     super.key,
@@ -14,12 +20,21 @@ class SettingsScreen extends StatefulWidget {
     required this.password,
   });
 
+
+
+
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
 }
 
+
+
+
 class _SettingsScreenState extends State<SettingsScreen> {
   bool _isDarkMode = false;
+
+
+
 
   @override
   void initState() {
@@ -28,6 +43,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _checkCurrentTheme();
   }
 
+
+
+
   void _checkCurrentTheme() {
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     setState(() {
@@ -35,15 +53,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+
+
+
   void _toggleTheme(bool value) {
     setState(() {
       _isDarkMode = value;
     });
-    
+   
     // Cambiar el tema globalmente usando Provider
     final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
     themeProvider.setTheme(value ? ThemeMode.dark : ThemeMode.light);
-    
+   
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Tema ${value ? 'oscuro' : 'claro'} activado'),
@@ -51,6 +72,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +122,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+
+
+
   // Widget para el selector de tema
   Widget _buildThemeSelector() {
     return Card(
@@ -134,6 +161,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+
+
+
 
   Widget _buildFeatureCard(BuildContext context, IconData icon, String title, String description, Color color) {
     return InkWell(

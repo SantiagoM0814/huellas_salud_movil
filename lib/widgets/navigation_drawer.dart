@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+
 class CustomDrawer extends StatelessWidget {
   final String username;
   final Function(int) onItemSelected;
   final VoidCallback onLogout;
   final int currentIndex;
+
 
   const CustomDrawer({
     super.key,
@@ -13,6 +15,7 @@ class CustomDrawer extends StatelessWidget {
     required this.onLogout,
     required this.currentIndex,
   });
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +29,7 @@ class CustomDrawer extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildHeader(BuildContext context) {
     return DrawerHeader(
@@ -71,6 +75,7 @@ class CustomDrawer extends StatelessWidget {
       ),
     );
   }
+
 
   Widget _buildMenuItems(BuildContext context) {
     return Column(
@@ -131,6 +136,7 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
+
   Widget _buildListTile(
     BuildContext context,
     IconData icon,
@@ -162,6 +168,7 @@ class CustomDrawer extends StatelessWidget {
         selectedTileColor: Theme.of(context).primaryColor.withOpacity(0.1),
     );
   }
+
 
   Widget _buildLogoutTile(BuildContext context) {
     return ListTile(

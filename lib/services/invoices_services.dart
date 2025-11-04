@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/invoice.dart';
 
+
 class FacturaService {
   final Dio _dio = Dio(
     BaseOptions(
@@ -9,6 +10,7 @@ class FacturaService {
       receiveTimeout: const Duration(seconds: 10),
     ),
   );
+
 
   Future<List<Factura>> fetchFacturas({int limit = 20, int offset = 0}) async {
     try {
@@ -38,6 +40,7 @@ class FacturaService {
         );
       });
 
+
       return facturasEjemplo.sublist(offset, offset + limit > facturasEjemplo.length
           ? facturasEjemplo.length
           : offset + limit);
@@ -49,6 +52,7 @@ class FacturaService {
       }
     }
   }
+
 
   Future<Factura> fetchFacturaById(String id) async {
     try {

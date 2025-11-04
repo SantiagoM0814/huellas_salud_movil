@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../models/pets.dart';
 
+
 class PetService {
   final Dio _dio = Dio(
     BaseOptions(
@@ -10,6 +11,7 @@ class PetService {
     ),
   );
 
+
   Future<List<Pet>> fetchPet({int limit = 20, int offset = 0}) async {
     try {
       final response = await _dio.get(
@@ -17,12 +19,15 @@ class PetService {
         queryParameters: {'limit': limit, 'offset': offset},
       );
 
+
       if (response.statusCode == 200) {
         final List<dynamic> results = response.data;
+
 
         // Mapear solo los datos que vienen en results sin hacer peticiones extra
         final List<Pet> pets = results.map((item) {
           final data = item['data'] ?? {};
+
 
           MediaFile? mediaFile;
           if (data['mediaFile'] != null) {
@@ -34,6 +39,7 @@ class PetService {
             );
           }
 
+
           return Pet(
             idPet: data['idPet']
                 .toString(), // convertimos a String por seguridad
@@ -44,6 +50,7 @@ class PetService {
             mediaFile: mediaFile,
           );
         }).toList();
+
 
         return pets;
       } else {
@@ -58,9 +65,11 @@ class PetService {
     }
   }
 
+
   Future<Pet> fetchProductById(int id) async {
     try {
       final response = await _dio.get('pet/$id'); // 👈 Ajusta el endpoint
+
 
       if (response.statusCode == 200) {
         return Pet.fromJson(response.data);

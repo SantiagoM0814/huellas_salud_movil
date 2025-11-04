@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'pages/splash/splash_app.dart';
 import 'theme/theme_app.dart';
-import 'theme/theme_provider.dart';
+import 'theme/theme_provider.dart'; // ✅ Asegúrate de tener esta importación
+
 
 void main(){
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +24,7 @@ class MyApp extends StatelessWidget {
             title: 'Huellas & Salud',
             theme: AppTheme.lightTheme(),
             darkTheme: AppTheme.darkTheme(),  
-            themeMode: themeProvider.themeMode,
+            themeMode: themeProvider.themeMode, // ✅ Usar el tema del provider
             home: const SplashScreen(),
             debugShowCheckedModeBanner: false,
           );

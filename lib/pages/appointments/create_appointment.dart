@@ -3,26 +3,30 @@ import '../../widgets/appbar.dart';
 import '../../services/appointments_services.dart';
 import '../../models/appointment.dart';
 
+
 class CrearCitaScreen extends StatefulWidget {
   const CrearCitaScreen({super.key});
+
 
   @override
   State<CrearCitaScreen> createState() => _CrearCitaScreenState();
 }
 
+
 class _CrearCitaScreenState extends State<CrearCitaScreen> {
   final CitaService _citaService = CitaService();
   final _formKey = GlobalKey<FormState>();
-  
+ 
   // Controladores
   final TextEditingController _mascotaController = TextEditingController();
   final TextEditingController _servicioController = TextEditingController();
   final TextEditingController _veterinarioController = TextEditingController();
   final TextEditingController _notasController = TextEditingController();
-  
+ 
   DateTime _fechaSeleccionada = DateTime.now();
   TimeOfDay _horaSeleccionada = TimeOfDay.now();
   bool _isLoading = false;
+
 
   // Listas de opciones
   final List<String> _mascotas = ['Firulais', 'Mishi', 'Rex', 'Luna'];
@@ -41,6 +45,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
     'Dr. Luis Fernandez'
   ];
 
+
   Future<void> _seleccionarFecha() async {
     final DateTime? fecha = await showDatePicker(
       context: context,
@@ -48,7 +53,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
-    
+   
     if (fecha != null) {
       setState(() {
         _fechaSeleccionada = fecha;
@@ -56,18 +61,20 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
     }
   }
 
+
   Future<void> _seleccionarHora() async {
     final TimeOfDay? hora = await showTimePicker(
       context: context,
       initialTime: _horaSeleccionada,
     );
-    
+   
     if (hora != null) {
       setState(() {
         _horaSeleccionada = hora;
       });
     }
   }
+
 
   String _formatTime(TimeOfDay time) {
     final hour = time.hourOfPeriod;
@@ -76,13 +83,16 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
     return '$hour:$minute $period';
   }
 
+
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
 
+
   Future<void> _crearCita() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
+
 
       try {
         final nuevaCita = Cita(
@@ -97,8 +107,9 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
           notas: _notasController.text,
         );
 
+
         final success = await _citaService.crearCita(nuevaCita);
-        
+       
         if (success) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Cita creada exitosamente')),
@@ -114,6 +125,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -158,6 +170,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
                     ),
                     const SizedBox(height: 20),
 
+
                     // Servicio
                     DropdownButtonFormField<String>(
                       value: _servicios.isNotEmpty ? _servicios.first : null,
@@ -186,6 +199,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
                     ),
                     const SizedBox(height: 20),
 
+
                     // Fecha
                     TextFormField(
                       readOnly: true,
@@ -205,6 +219,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
                     ),
                     const SizedBox(height: 20),
 
+
                     // Hora
                     TextFormField(
                       readOnly: true,
@@ -217,6 +232,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
                       onTap: _seleccionarHora,
                     ),
                     const SizedBox(height: 20),
+
 
                     // Veterinario
                     DropdownButtonFormField<String>(
@@ -246,6 +262,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
                     ),
                     const SizedBox(height: 20),
 
+
                     // Notas
                     TextFormField(
                       controller: _notasController,
@@ -258,6 +275,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
                       maxLines: 3,
                     ),
                     const SizedBox(height: 30),
+
 
                     // Botón de crear cita
                     ElevatedButton(
@@ -275,6 +293,7 @@ class _CrearCitaScreenState extends State<CrearCitaScreen> {
             ),
     );
   }
+
 
   @override
   void dispose() {

@@ -3,12 +3,15 @@ import '../../models/invoice.dart';
 import '../../services/invoices_services.dart';
 import './detail_invoice.dart';
 
+
 class HistorialFacturasScreen extends StatefulWidget {
   const HistorialFacturasScreen({super.key});
+
 
   @override
   _HistorialFacturasScreenState createState() => _HistorialFacturasScreenState();
 }
+
 
 class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
   final FacturaService _facturaService = FacturaService();
@@ -20,16 +23,20 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
   int _currentPage = 1;
   final TextEditingController _searchController = TextEditingController();
 
+
   @override
   void initState() {
     super.initState();
     _loadFacturas();
   }
 
+
   Future<void> _loadFacturas() async {
     if (_isLoading || !_hasMore) return;
 
+
     setState(() => _isLoading = true);
+
 
     try {
       final newFacturas = await _facturaService.fetchFacturas(limit: _limit, offset: _offset);
@@ -53,6 +60,7 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
     }
   }
 
+
   List<Factura> _filterFacturas() {
     if (_searchController.text.isEmpty) {
       return _facturas;
@@ -67,10 +75,12 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
     }).toList();
   }
 
+
   String _formatPrice(double price) {
     return price.toStringAsFixed(0).replaceAllMapped(
         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
   }
+
 
   Color _getColorByEstado(String estado) {
     switch (estado) {
@@ -84,6 +94,7 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
         return Colors.grey;
     }
   }
+
 
   Widget _buildFacturaCard(BuildContext context, Factura factura) {
     return Card(
@@ -158,6 +169,7 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
     );
   }
 
+
   Widget _buildPagination(int totalPages) {
     if (totalPages <= 1) return SizedBox.shrink();
    
@@ -201,6 +213,7 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     final filteredFacturas = _filterFacturas();
@@ -210,11 +223,10 @@ class _HistorialFacturasScreenState extends State<HistorialFacturasScreen> {
     final currentFacturas = filteredFacturas.sublist(
         startIndex, endIndex > filteredFacturas.length ? filteredFacturas.length : endIndex);
 
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Facturas'),
-        backgroundColor: Colors.purple,
-        foregroundColor: Colors.white,
       ),
       body: Column(
         children: [
