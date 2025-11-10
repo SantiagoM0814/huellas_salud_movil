@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AnnouncementService {
   final Dio _dio = Dio(
-    BaseOptions(baseUrl: "https://huellassalud.onrender.com"),
+    BaseOptions(baseUrl: "http://localhost:8080"),
   );
 
   // 🟣 Crear anuncio
@@ -16,7 +16,6 @@ class AnnouncementService {
     Uint8List? imageBytes,
   }) async {
     try {
-
       final body = {
         "data": {
           "description": description,
@@ -38,15 +37,14 @@ class AnnouncementService {
         final data = response.data["data"];
         final String? announcementId = data?["idAnnouncement"];
 
-
         if (announcementId != null) {
           if (kIsWeb && imageBytes != null) {
             await uploadAnnouncementImageWeb(
               announcementId: announcementId,
-              bytes: imageBytes,
+              imageBytes: imageBytes,
             );
           } else if (!kIsWeb && imageFile != null) {
-            await uploadAnnouncementImage(
+            await uploadAnnouncementImageWeb(
               announcementId: announcementId,
               imageFile: imageFile,
             );
@@ -64,24 +62,41 @@ class AnnouncementService {
     }
   }
 
-  // 🟣 Subir imagen (Android/iOS)
-  Future<void> uploadAnnouncementImage({
+
+ Future<void> uploadAnnouncementImageWeb({
     required String announcementId,
-    required File imageFile,
+    File? imageFile,
+    Uint8List? imageBytes,
   }) async {
     try {
-      final formData = FormData.fromMap({
-        "fileUpload": await MultipartFile.fromFile(
-          imageFile.path,
-          filename: imageFile.path.split('/').last,
-        ),
-      });
+      FormData formData;
 
-      print("📸 Subiendo imagen para anuncio ID: $announcementId");
+      if (kIsWeb && imageBytes != null) {
+        formData = FormData.fromMap({
+          "file": MultipartFile.fromBytes(
+            imageBytes,
+            filename: "announcement_$announcementId.png",
+          ),
+        });
+      } else if (!kIsWeb && imageFile != null) {
+        formData = FormData.fromMap({
+          "file": await MultipartFile.fromFile(
+            imageFile.path,
+            filename: imageFile.path.split('/').last,
+          ),
+        });
+      } else {
+        throw Exception("⚠️ Debes proporcionar una imagen para enviar.");
+      }
+
+      print("📤 Subiendo imagen para anuncio ID: $announcementId...");
 
       final response = await _dio.post(
-        "/internal/avatar-user/announcement/$announcementId",
+        "/internal/avatar-user/ANNOUNCEMENT/$announcementId",
         data: formData,
+        options: Options(headers: {
+          "Content-Type": "multipart/form-data",
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -90,41 +105,19 @@ class AnnouncementService {
         print("⚠️ Error al subir imagen: ${response.statusCode}");
       }
     } on DioException catch (e) {
-      print("❌ Error al subir imagen: ${e.response?.data}");
-      rethrow;
-    }
-  }
+      final errorData = e.response?.data;
+      final statusCode = e.response?.statusCode;
+      print("❌ Error al subir imagen: ${errorData ?? e.message}");
+      print("📦 Código de estado: $statusCode");
 
-  // 🟣 Subir imagen (Web)
-  Future<void> uploadAnnouncementImageWeb({
-    required String announcementId,
-    required Uint8List bytes,
-  }) async {
-    try {
-      final formData = FormData.fromMap({
-        "fileUpload": MultipartFile.fromBytes(
-          bytes,
-          filename: "announcement_$announcementId.png",
-        ),
-      });
-
-      print("🌐 Subiendo imagen (Web) para anuncio ID: $announcementId");
-
-      final response = await _dio.post(
-        "/internal/avatar-user/announcement/$announcementId",
-        data: formData,
-      );
-
-      if (response.statusCode == 200) {
-        print("✅ Imagen subida correctamente (Web)");
-      } else {
-        print("⚠️ Error al subir imagen en Web: ${response.statusCode}");
+      if (errorData is Map && errorData.containsKey("message")) {
+        print("🧩 Detalle del error: ${errorData["message"]}");
       }
-    } on DioException catch (e) {
-      print("❌ Error al subir imagen Web: ${e.response?.data}");
+
       rethrow;
     }
   }
+
 
   // 🟣 Listar anuncios
   Future<List<Map<String, dynamic>>> listAnnouncements() async {

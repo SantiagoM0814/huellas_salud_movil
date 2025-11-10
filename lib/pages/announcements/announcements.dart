@@ -87,7 +87,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
 
       if (id != null) {
         if (!kIsWeb && _selectedImage != null) {
-          await _announcementService.uploadAnnouncementImage(
+          await _announcementService.uploadAnnouncementImageWeb(
             announcementId: id,
             imageFile: _selectedImage!,
           );
@@ -95,7 +95,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           // 🟣 Subida para web
           await _announcementService.uploadAnnouncementImageWeb(
             announcementId: id,
-            bytes: _webImageBytes!,
+            imageBytes: _webImageBytes!,
           );
         }
 
