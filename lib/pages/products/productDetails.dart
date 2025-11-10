@@ -60,7 +60,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     horizontal: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).floatingActionButtonTheme.backgroundColor,
+                    color: Theme.of(
+                      context,
+                    ).floatingActionButtonTheme.backgroundColor,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
@@ -178,7 +180,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 }
 
 final formatter = NumberFormat.currency(
-  locale: 'es_CO', // Español Colombia
-  symbol: '', // sin símbolo, lo ponemos manualmente
-  decimalDigits: 0, // sin decimales
+  locale: 'es_CO',
+  symbol: '',
+  decimalDigits: 0,
 );
