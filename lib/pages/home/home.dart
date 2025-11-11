@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:huellas_salud_movil/pages/announcements/announcements_list.dart';
 import 'package:huellas_salud_movil/pages/announcements/announcements.dart';
 import 'package:huellas_salud_movil/pages/products/productDetails.dart';
 import 'package:huellas_salud_movil/pages/products/products.dart';
@@ -42,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
           _pageController.jumpToPage(2);
         },
       ),
-      const AnnouncementListPage(),
+      const AnnouncementsPage(),
       const ProductHomePage(),
       UserScreen(username: widget.username, password: widget.password),
     ];
@@ -64,47 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
       ),
-
-      // 🔹 Solo mostrar el botón flotante en la pestaña de “Anuncios”
-      floatingActionButton: _currentIndex == 1
-          ? FloatingActionButton(
-              backgroundColor: Colors.purple,
-              child: const Icon(Icons.add, color: Colors.white),
-              onPressed: () {
-                showModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.white,
-                  shape: const RoundedRectangleBorder(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                  ),
-                  builder: (context) {
-                    return SafeArea(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ListTile(
-                            leading:
-                                const Icon(Icons.campaign, color: Colors.purple),
-                            title: const Text('Crear anuncio'),
-                            onTap: () {
-                              Navigator.pop(context); // Cierra el modal
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AnnouncementPage(),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(height: 10),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            )
-          : null,
 
       bottomNavigationBar: BottomNavigation(
         currentIndex: _currentIndex,

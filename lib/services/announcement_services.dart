@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
+import '../models/announcement.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class AnnouncementService {
   final Dio _dio = Dio(
-    BaseOptions(baseUrl: "http://localhost:8080"),
+    BaseOptions(baseUrl: "https://huellassalud.onrender.com/internal"),
   );
 
   // 🟣 Crear anuncio
@@ -27,7 +28,7 @@ class AnnouncementService {
       print("📤 Enviando datos al servidor: $body");
 
       final response = await _dio.post(
-        "/internal/announcement/create",
+        "/announcement/create",
         data: body,
       );
 
@@ -92,7 +93,7 @@ class AnnouncementService {
       print("📤 Subiendo imagen para anuncio ID: $announcementId...");
 
       final response = await _dio.post(
-        "/internal/avatar-user/ANNOUNCEMENT/$announcementId",
+        "/avatar-user/ANNOUNCEMENT/$announcementId",
         data: formData,
         options: Options(headers: {
           "Content-Type": "multipart/form-data",
@@ -118,34 +119,49 @@ class AnnouncementService {
     }
   }
 
-
-  // 🟣 Listar anuncios
-  Future<List<Map<String, dynamic>>> listAnnouncements() async {
+    Future<List<Announcement>> fetchAnnouncements() async {
     try {
-      final response =
-          await _dio.get("/internal/announcement/list-announcements");
+      final response = await _dio.get(
+        '/announcement/list-announcements',
+      );
 
-      if (response.statusCode == 200 && response.data is List) {
-        final List<dynamic> dataList = response.data;
+      if (response.statusCode == 200) {
+        final List<dynamic> results = response.data;
 
-        return dataList.map<Map<String, dynamic>>((item) {
-          final data = item["data"] ?? {};
-          final meta = item["meta"] ?? {};
+        // Mapear solo los datos que vienen en results sin hacer peticiones extra
+        final List<Announcement> products = results.map((item) {
+          final data = item['data'] ?? {};
 
-          return {
-            ...data,
-            "nameUserCreated": meta["nameUserCreated"],
-            "emailUserCreated": meta["emailUserCreated"],
-            "roleUserCreated": meta["roleUserCreated"],
-          };
+          MediaFile? mediaFile;
+          if (data['mediaFile'] != null) {
+            final mf = data['mediaFile'];
+            mediaFile = MediaFile(
+              fileName: mf['fileName'] ?? '',
+              contentType: mf['contentType'] ?? '',
+              attachment: mf['attachment'] ?? '',
+            );
+          }
+
+          return Announcement(
+            idAnnouncement: data['idAnnouncement']
+                .toString(), // convertimos a String por seguridad
+            description: data['description'] ?? 'Sin Descripción',
+            cellPhone: data['cellPhone'],
+            status: data['status'],
+            mediaFile: mediaFile,
+          );
         }).toList();
-      }
 
-      print("⚠️ Respuesta inesperada: ${response.statusCode}");
-      return [];
+        return products;
+      } else {
+        throw Exception('Failed to load announcements');
+      }
     } on DioException catch (e) {
-      print("❌ Error listAnnouncements: ${e.response?.data}");
-      return [];
+      if (e.response != null) {
+        throw Exception('Error: ${e.response!.statusCode}');
+      } else {
+        throw Exception('Network error: ${e.message}');
+      }
     }
   }
 }

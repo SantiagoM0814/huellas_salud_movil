@@ -1,179 +1,90 @@
-import 'dart:typed_data';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' as io;
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-
+import '../../models/announcement.dart';
 import '../../services/announcement_services.dart';
+import '../../widgets/announcementList.dart';
+import 'announcement_page.dart';
 
-class AnnouncementPage extends StatefulWidget {
-  const AnnouncementPage({Key? key}) : super(key: key);
+class AnnouncementsPage extends StatefulWidget {
+  const AnnouncementsPage({super.key});
 
   @override
-  State<AnnouncementPage> createState() => _AnnouncementPageState();
+  State<AnnouncementsPage> createState() => _AnnouncementsPageState();
 }
 
-class _AnnouncementPageState extends State<AnnouncementPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _descriptionController = TextEditingController();
-  final _cellPhoneController = TextEditingController();
-  final AnnouncementService _announcementService = AnnouncementService();
+class _AnnouncementsPageState extends State<AnnouncementsPage> {
+  final AnnouncementService _service = AnnouncementService();
 
-  Uint8List? _webImageBytes;
-  io.File? _selectedImage;  
+  List<Announcement> _announcements = [];
   bool _isLoading = false;
+  bool _hasMore = true;
+  int _offset = 0;
+  final int _limit = 20;
 
-  // 📸 Seleccionar imagen
-  Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (picked != null) {
-      if (kIsWeb) {
-        final bytes = await picked.readAsBytes();
-        setState(() => _webImageBytes = bytes);
-      } else {
-        setState(() => _selectedImage = io.File(picked.path));
-      }
-    }
+  @override
+  void initState() {
+    super.initState();
+    _fetchAnnouncements();
   }
 
-  // 🖼️ Mostrar imagen seleccionada o placeholder
-  Widget _buildPreviewImage() {
-    if (kIsWeb && _webImageBytes != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.memory(
-          _webImageBytes!,
-          height: 180,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else if (!kIsWeb && _selectedImage != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.file(
-          _selectedImage!,
-          height: 180,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          'assets/img/images/placeholder.png',
-          height: 180,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-  }
-
-  // 🟣 Crear anuncio y subir imagen
-  Future<void> _createAnnouncement() async {
-    if (!_formKey.currentState!.validate()) return;
-
+  Future<void> _fetchAnnouncements({bool loadMore = false}) async {
+    if (_isLoading) return;
     setState(() => _isLoading = true);
 
     try {
-      final id = await _announcementService.createAnnouncement(
-  description: _descriptionController.text.trim(),
-  cellPhone: _cellPhoneController.text.trim(),
-  
-      );
+      final newAnnouncements = await _service.fetchAnnouncements();
 
-      if (id != null) {
-        if (!kIsWeb && _selectedImage != null) {
-          await _announcementService.uploadAnnouncementImageWeb(
-            announcementId: id,
-            imageFile: _selectedImage!,
-          );
-        } else if (kIsWeb && _webImageBytes != null) {
-          // 🟣 Subida para web
-          await _announcementService.uploadAnnouncementImageWeb(
-            announcementId: id,
-            imageBytes: _webImageBytes!,
-          );
+      setState(() {
+        if (loadMore) {
+          _announcements.addAll(newAnnouncements);
+        } else {
+          _announcements = newAnnouncements;
         }
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ Anuncio creado exitosamente")),
-          );
-          Navigator.pop(context);
-        }
-      }
+        _hasMore = newAnnouncements.length == _limit;
+        if (_hasMore) _offset += _limit;
+      });
     } catch (e) {
-      print("❌ Error al crear anuncio: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Error al crear el anuncio")),
-      );
+      debugPrint('Error cargando anuncios: $e');
     } finally {
       setState(() => _isLoading = false);
+    }
+  }
+
+  void _onAnnouncementTap(Announcement announcement) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Anuncio: ${announcement.description}')),
+    );
+  }
+
+  // 🟣 Ir a la página de creación de anuncios
+  Future<void> _goToCreateAnnouncement() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AnnouncementPage()),
+    );
+
+    // Si se creó un anuncio, recargamos la lista
+    if (result == true && mounted) {
+      _fetchAnnouncements();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
+      body: _announcements.isEmpty && _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : AnnouncementList(
+              announcements: _announcements,
+              onAnnouncementTap: _onAnnouncementTap,
+              isLoading: _isLoading,
+              hasMore: _hasMore,
+              onLoadMore: () => _fetchAnnouncements(loadMore: true),
+            ),
+      floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.purple,
-        title: const Text("Crear anuncio"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: _buildPreviewImage(),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: "Descripción",
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 4,
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Campo requerido" : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _cellPhoneController,
-                decoration: const InputDecoration(
-                  labelText: "Teléfono de contacto",
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Campo requerido" : null,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _createAnnouncement,
-                  icon: const Icon(Icons.send, color: Colors.white),
-                  label: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Publicar anuncio"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+        onPressed: _goToCreateAnnouncement, // ya no hay postFrameCallback
+        child: const Icon(Icons.add),
       ),
     );
   }
