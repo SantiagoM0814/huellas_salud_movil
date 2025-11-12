@@ -14,67 +14,71 @@ class AnnouncementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 170,
-      height: 220,
-      child: Card(
-        elevation: 4,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        splashColor: colorScheme.primary.withOpacity(0.1),
+        child: Card(
+          elevation: 6,
+          shadowColor: Colors.black26,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          color: theme.cardColor,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Imagen o ícono por defecto
-                SizedBox(
-                  height: 120,
-                  width: 120,
-                  child: Center(child: _buildAnnouncementImage(announcement)),
-                ),
-
-                const SizedBox(height: 8),
-
-                // Descripción
-                Expanded(
-                  child: Text(
-                    announcement.description,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                // 🖼️ Imagen arriba
+                Container(
+                  width: double.infinity,
+                  height: 160,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.grey[200],
+                    image: _buildImageDecoration(announcement),
                   ),
+                  child: announcement.mediaFile == null ||
+                          announcement.mediaFile!.attachment.isEmpty
+                      ? const Icon(Icons.image_not_supported,
+                          color: Colors.grey, size: 50)
+                      : null,
                 ),
+                const SizedBox(height: 10),
 
-                const SizedBox(height: 4),
-
-                // Teléfono
+                // 📝 Descripción
                 Text(
-                  announcement.cellPhone.isNotEmpty
-                      ? '📞 ${announcement.cellPhone}'
-                      : 'Sin teléfono',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.purple,
+                  announcement.description,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: 10),
 
-                const SizedBox(height: 4),
-
-                // Estado (activo/inactivo)
-                Text(
-                  announcement.status ? 'Activo' : 'Inactivo',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: announcement.status ? Colors.green : Colors.red,
-                  ),
+                // 📞 Teléfono centrado
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.phone, size: 16, color: Colors.purple),
+                    const SizedBox(width: 6),
+                    Text(
+                      announcement.cellPhone.isNotEmpty
+                          ? announcement.cellPhone
+                          : 'Sin teléfono',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.purple,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -84,24 +88,19 @@ class AnnouncementCard extends StatelessWidget {
     );
   }
 
-  Widget _buildAnnouncementImage(Announcement announcement) {
+  DecorationImage? _buildImageDecoration(Announcement announcement) {
     if (announcement.mediaFile != null &&
         announcement.mediaFile!.attachment.isNotEmpty) {
       try {
         final bytes = base64Decode(announcement.mediaFile!.attachment);
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.memory(
-            bytes,
-            height: 120,
-            width: 120,
-            fit: BoxFit.cover,
-          ),
+        return DecorationImage(
+          image: MemoryImage(bytes),
+          fit: BoxFit.cover,
         );
-      } catch (e) {
-        return const Icon(Icons.image_not_supported, size: 60, color: Colors.grey);
+      } catch (_) {
+        return null;
       }
     }
-    return const Icon(Icons.image_not_supported, size: 60, color: Colors.grey);
+    return null;
   }
 }

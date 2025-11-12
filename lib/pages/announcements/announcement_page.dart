@@ -22,7 +22,6 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   io.File? _selectedImage;
   bool _isLoading = false;
 
-  // 📸 Seleccionar imagen
   Future<void> _pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
 
@@ -36,45 +35,69 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
     }
   }
 
-  // 🖼️ Mostrar imagen seleccionada o placeholder
-  Widget _buildPreviewImage() {
-    if (kIsWeb && _webImageBytes != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.memory(
-          _webImageBytes!,
-          height: 180,
+  Widget _buildPreviewImage(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+    final bool hasImage =
+        (kIsWeb && _webImageBytes != null) || (!kIsWeb && _selectedImage != null);
+
+    final imageWidget = (kIsWeb && _webImageBytes != null)
+        ? Image.memory(_webImageBytes!, fit: BoxFit.cover)
+        : (!kIsWeb && _selectedImage != null)
+            ? Image.file(_selectedImage!, fit: BoxFit.cover)
+            : Image.asset('assets/img/images/placeholder.png', fit: BoxFit.contain);
+
+    return GestureDetector(
+      onTap: _pickImage,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          height: hasImage ? 200 : 120,
           width: double.infinity,
-          fit: BoxFit.cover,
+          color: Colors.grey[200],
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              imageWidget,
+              if (hasImage)
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  padding: const EdgeInsets.only(bottom: 8),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [Colors.transparent, Colors.black38],
+                    ),
+                  ),
+                  child: const Text(
+                    "Cambiar imagen",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                    ),
+                  ),
+                )
+              else
+                Center(
+                  child: Text(
+                    "Seleccionar imagen",
+                    style: TextStyle(
+                      color: primaryColor.withOpacity(0.8),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
-      );
-    } else if (!kIsWeb && _selectedImage != null) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.file(
-          _selectedImage!,
-          height: 180,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    } else {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          'assets/img/images/placeholder.png',
-          height: 180,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
+      ),
+    );
   }
 
-  // 🟣 Crear anuncio
   Future<void> _createAnnouncement() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
 
     try {
@@ -89,10 +112,10 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("✅ Anuncio creado exitosamente")),
         );
-        Navigator.pop(context, true); // 👈 devuelve true al volver
+        Navigator.pop(context, true);
       }
     } catch (e) {
-      print("❌ Error al crear anuncio: $e");
+      debugPrint("❌ Error al crear anuncio: $e");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error al crear el anuncio")),
       );
@@ -103,60 +126,146 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.purple,
-        title: const Text("Crear anuncio"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: _buildPreviewImage(),
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: "Descripción",
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 4,
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Campo requerido" : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _cellPhoneController,
-                decoration: const InputDecoration(
-                  labelText: "Teléfono de contacto",
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    value == null || value.isEmpty ? "Campo requerido" : null,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _isLoading ? null : _createAnnouncement,
-                  icon: const Icon(Icons.send, color: Colors.white),
-                  label: _isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Publicar anuncio"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.purple,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+      backgroundColor: const Color(0xFFF8F5FB),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            // 🟣 Contenido más centrado
+            SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 140, 20, 120),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    "Crear anuncio",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 26,
+                      color: Colors.purple,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+                  const SizedBox(height: 30),
+                  Card(
+                    elevation: 8,
+                    shadowColor: Colors.black12,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            _buildPreviewImage(context),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _descriptionController,
+                              maxLines: 4,
+                              decoration: InputDecoration(
+                                labelText: "Descripción del anuncio",
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? "Campo requerido" : null,
+                            ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: _cellPhoneController,
+                              keyboardType: TextInputType.phone,
+                              decoration: InputDecoration(
+                                labelText: "Teléfono de contacto",
+                                filled: true,
+                                fillColor: Colors.grey[100],
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                              validator: (v) =>
+                                  v == null || v.isEmpty ? "Campo requerido" : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // 🔙 Flecha de regreso
+            Positioned(
+              top: 16,
+              left: 10,
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+                radius: 22,
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back, color: primaryColor),
+                  onPressed: () => Navigator.pop(context),
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+
+      // 🟣 Barra inferior tipo navbar refinada
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: primaryColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: ElevatedButton.icon(
+            onPressed: _isLoading ? null : _createAnnouncement,
+            icon: _isLoading
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.send, color: Colors.white, size: 20),
+            label: Text(
+              _isLoading ? "Publicando..." : "Publicar anuncio",
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
           ),
         ),
       ),

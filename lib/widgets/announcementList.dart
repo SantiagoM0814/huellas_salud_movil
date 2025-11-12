@@ -21,11 +21,10 @@ class AnnouncementList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification scrollInfo) {
-        // Detecta cuando se llega al final del scroll y carga más
+      onNotification: (scrollInfo) {
         if (onLoadMore != null &&
             !isLoading &&
-            scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+            scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 50) {
           onLoadMore!();
         }
         return false;
@@ -33,19 +32,15 @@ class AnnouncementList extends StatelessWidget {
       child: Column(
         children: [
           Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // dos columnas
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.75, // ajusta proporción según el diseño
-              ),
-              padding: const EdgeInsets.all(8),
+            child: ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8),
               itemCount: announcements.length + (isLoading && hasMore ? 1 : 0),
               itemBuilder: (context, index) {
-                // Mostrar spinner de carga si hay más elementos cargando
                 if (index == announcements.length) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
                 }
 
                 final announcement = announcements[index];

@@ -25,7 +25,7 @@ class BottomNavigation extends StatelessWidget {
           label: 'Inicio',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.alarm),
+          icon: Icon(Icons.article),
           label: 'Anuncios',
         ),
         BottomNavigationBarItem(
