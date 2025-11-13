@@ -3,11 +3,31 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import '../models/announcement.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AnnouncementService {
   final Dio _dio = Dio(
-    BaseOptions(baseUrl: "https://huellassalud.onrender.com/internal"),
+    BaseOptions(
+      baseUrl: "https://huellassalud.onrender.com/internal",
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
   );
+
+  AnnouncementService() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final prefs = await SharedPreferences.getInstance();
+          final token = prefs.getString('auth_token');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+          return handler.next(options);
+        },
+      ),
+    );
+  }
 
   // 🟣 Crear anuncio
   Future<String?> createAnnouncement({
@@ -22,15 +42,12 @@ class AnnouncementService {
           "description": description,
           "cellPhone": cellPhone,
           "status": true,
-        }
+        },
       };
 
       print("📤 Enviando datos al servidor: $body");
 
-      final response = await _dio.post(
-        "/announcement/create",
-        data: body,
-      );
+      final response = await _dio.post("/announcement/create", data: body);
 
       print("✅ Respuesta del servidor: ${response.data}");
 
@@ -63,8 +80,7 @@ class AnnouncementService {
     }
   }
 
-
- Future<void> uploadAnnouncementImageWeb({
+  Future<void> uploadAnnouncementImageWeb({
     required String announcementId,
     File? imageFile,
     Uint8List? imageBytes,
@@ -95,12 +111,10 @@ class AnnouncementService {
       final response = await _dio.post(
         "/avatar-user/ANNOUNCEMENT/$announcementId",
         data: formData,
-        options: Options(headers: {
-          "Content-Type": "multipart/form-data",
-        }),
+        options: Options(headers: {"Content-Type": "multipart/form-data"}),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         print("✅ Imagen subida correctamente");
       } else {
         print("⚠️ Error al subir imagen: ${response.statusCode}");
@@ -119,11 +133,20 @@ class AnnouncementService {
     }
   }
 
-    Future<List<Announcement>> fetchAnnouncements() async {
+  Future<List<Announcement>> fetchAnnouncements() async {
     try {
-      final response = await _dio.get(
-        '/announcement/list-announcements',
+      _dio.interceptors.add(
+        LogInterceptor(
+          request: true,
+          requestBody: true,
+          responseBody: true,
+          responseHeader: false,
+          error: true,
+          logPrint: (obj) => print("📡 DIO LOG: $obj"),
+        ),
       );
+
+      final response = await _dio.get('/announcement/list-announcements');
 
       if (response.statusCode == 200) {
         final List<dynamic> results = response.data;
