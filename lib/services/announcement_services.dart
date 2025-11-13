@@ -37,10 +37,11 @@ class AnnouncementService {
     Uint8List? imageBytes,
   }) async {
     try {
+      final formattedPhone = formatPhoneNumber(cellPhone);
       final body = {
         "data": {
           "description": description,
-          "cellPhone": cellPhone,
+          "cellPhone": formattedPhone,
           "status": true,
         },
       };
@@ -190,3 +191,33 @@ class AnnouncementService {
     }
   }
 }
+
+
+/// 🔧 Formatea el número al formato '57-3-XXXXXXXXX' o '60-1-XXXXXXX'
+String formatPhoneNumber(String input) {
+  // Eliminar cualquier carácter que no sea número
+  String digits = input.replaceAll(RegExp(r'[^0-9]'), '');
+
+  // 📞 Si ya tiene formato internacional colombiano (573XXXXXXXXX)
+  if (RegExp(r'^57\d{9}$').hasMatch(digits)) {
+    return '57-${digits.substring(2, 3)}-${digits.substring(3)}';
+  }
+
+  // 📱 Si es un celular nacional (10 dígitos y empieza con 3)
+  if (RegExp(r'^3\d{9}$').hasMatch(digits)) {
+    return '57-${digits.substring(0, 1)}-${digits.substring(1)}';
+  }
+
+  // ☎️ Si es un número fijo (7 dígitos, ej. Bogotá)
+  if (RegExp(r'^\d{7}$').hasMatch(digits)) {
+    return '60-1-$digits';
+  }
+
+  // 🚫 Cualquier otro formato es inválido
+  throw Exception(
+    "⚠️ Número inválido: debe ser celular (3XXXXXXXXX) o fijo (7 dígitos)",
+  );
+}
+
+
+

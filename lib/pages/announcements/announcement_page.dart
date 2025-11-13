@@ -38,13 +38,14 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   Widget _buildPreviewImage(BuildContext context) {
     final primaryColor = Theme.of(context).primaryColor;
     final bool hasImage =
-        (kIsWeb && _webImageBytes != null) || (!kIsWeb && _selectedImage != null);
+        (kIsWeb && _webImageBytes != null) ||
+        (!kIsWeb && _selectedImage != null);
 
     final imageWidget = (kIsWeb && _webImageBytes != null)
         ? Image.memory(_webImageBytes!, fit: BoxFit.cover)
         : (!kIsWeb && _selectedImage != null)
-            ? Image.file(_selectedImage!, fit: BoxFit.cover)
-            : Image.asset('assets/img/images/placeholder.png', fit: BoxFit.contain);
+        ? Image.file(_selectedImage!, fit: BoxFit.cover)
+        : Image.asset('assets/img/images/placeholder.png', fit: BoxFit.contain);
 
     return GestureDetector(
       onTap: _pickImage,
@@ -175,8 +176,9 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                   borderSide: BorderSide.none,
                                 ),
                               ),
-                              validator: (v) =>
-                                  v == null || v.isEmpty ? "Campo requerido" : null,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? "Campo requerido"
+                                  : null,
                             ),
                             const SizedBox(height: 20),
                             TextFormField(
@@ -191,8 +193,17 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                                   borderSide: BorderSide.none,
                                 ),
                               ),
-                              validator: (v) =>
-                                  v == null || v.isEmpty ? "Campo requerido" : null,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Campo requerido";
+                                } else if (!RegExp(
+                                  r'^3\d{9}$',
+                                ).hasMatch(value)) {
+                                  // ⚠️ valida que empiece con 3 y tenga 10 dígitos
+                                  return "Ingrese un número de celular válido (ej: 3115367211)";
+                                }
+                                return null; // ✅ válido
+                              },
                             ),
                           ],
                         ),
