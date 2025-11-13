@@ -1,0 +1,5 @@
+MONGO_DATABASE: Huellas-Salud
+MONGO_HOSTS: cluster0.msu19nq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+MONGO_USERNAME: admin
+MONGO_PASSWORD: A0QZkciCkAirl5hl
+API_BREVO: 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
