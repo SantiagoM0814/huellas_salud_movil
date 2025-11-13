@@ -151,31 +151,33 @@ class AnnouncementService {
       if (response.statusCode == 200) {
         final List<dynamic> results = response.data;
 
-        // Mapear solo los datos que vienen en results sin hacer peticiones extra
-        final List<Announcement> products = results.map((item) {
-          final data = item['data'] ?? {};
+        final List<Announcement> activeAnnouncements = results
+            .where((item) => item['data']?['status'] == true)
+            .map((item) {
+              final data = item['data'] ?? {};
 
-          MediaFile? mediaFile;
-          if (data['mediaFile'] != null) {
-            final mf = data['mediaFile'];
-            mediaFile = MediaFile(
-              fileName: mf['fileName'] ?? '',
-              contentType: mf['contentType'] ?? '',
-              attachment: mf['attachment'] ?? '',
-            );
-          }
+              MediaFile? mediaFile;
+              if (data['mediaFile'] != null) {
+                final mf = data['mediaFile'];
+                mediaFile = MediaFile(
+                  fileName: mf['fileName'] ?? '',
+                  contentType: mf['contentType'] ?? '',
+                  attachment: mf['attachment'] ?? '',
+                );
+              }
 
-          return Announcement(
-            idAnnouncement: data['idAnnouncement']
-                .toString(), // convertimos a String por seguridad
-            description: data['description'] ?? 'Sin Descripción',
-            cellPhone: data['cellPhone'],
-            status: data['status'],
-            mediaFile: mediaFile,
-          );
-        }).toList();
+              return Announcement(
+                idAnnouncement: data['idAnnouncement']?.toString() ?? '',
+                description: data['description'] ?? 'Sin Descripción',
+                cellPhone: data['cellPhone'] ?? '',
+                status: data['status'] ?? false,
+                mediaFile: mediaFile,
+              );
+            })
+            .toList();
 
-        return products;
+        print("✅ Solo anuncios activos: ${activeAnnouncements.length}");
+        return activeAnnouncements;
       } else {
         throw Exception('Failed to load announcements');
       }

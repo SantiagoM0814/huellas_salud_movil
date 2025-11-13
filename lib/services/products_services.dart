@@ -21,7 +21,9 @@ class ProductService {
         final List<dynamic> results = response.data;
 
         // Mapear solo los datos que vienen en results sin hacer peticiones extra
-        final List<Product> products = results.map((item) {
+        final List<Product> products = results
+          .where((item) => item['data']?['active'] == true)
+          .map((item) {
           final data = item['data'] ?? {};
 
           MediaFile? mediaFile;
