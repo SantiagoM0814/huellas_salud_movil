@@ -181,7 +181,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
             builder: (BuildContext context) {
               return AlertDialog(
                 title: const Text('Registro Exitoso'),
-                content: const Text('¡Te has registrado correctamente!'),
+                content: const Text('¡Te has registrado correctamente! por favor validar el correo.'),
                 actions: [
                   TextButton(
                     onPressed: () {
