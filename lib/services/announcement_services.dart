@@ -203,17 +203,14 @@ String formatPhoneNumber(String input) {
     return '57-${digits.substring(2, 3)}-${digits.substring(3)}';
   }
 
-  // 📱 Si es un celular nacional (10 dígitos y empieza con 3)
   if (RegExp(r'^3\d{9}$').hasMatch(digits)) {
     return '57-${digits.substring(0, 1)}-${digits.substring(1)}';
   }
 
-  // ☎️ Si es un número fijo (7 dígitos, ej. Bogotá)
   if (RegExp(r'^\d{7}$').hasMatch(digits)) {
     return '60-1-$digits';
   }
 
-  // 🚫 Cualquier otro formato es inválido
   throw Exception(
     "⚠️ Número inválido: debe ser celular (3XXXXXXXXX) o fijo (7 dígitos)",
   );

@@ -4,6 +4,7 @@ import './users.dart';
 import '../pets/pets.dart';
 import '../invoices/invoice_list_page.dart';
 import '../auth/login.dart';
+import '../appointments/appointments.dart';
 
 class UserScreen extends StatelessWidget {
   final String username;
@@ -96,6 +97,8 @@ class UserScreen extends StatelessWidget {
                 ),
               ),
             ),
+
+            
             const SizedBox(height: 10),
             ListView(
               shrinkWrap: true,
@@ -112,6 +115,13 @@ class UserScreen extends StatelessWidget {
                   Icons.pets,
                   'Mascotas',
                   const PetHomePage(),
+                ),
+                const SizedBox(height: 10),
+                _buildFeatureCard(
+                  context,
+                  Icons.calendar_today,
+                  'Citas',
+                  const AppointmentListScreen(),
                 ),
                 const SizedBox(height: 10),
                 _buildFeatureCard(
@@ -188,10 +198,7 @@ class UserScreen extends StatelessWidget {
               const Expanded(
                 child: Text(
                   'Cerrar Sesión',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
               ),
             ],

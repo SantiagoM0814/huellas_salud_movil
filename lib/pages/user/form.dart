@@ -1,4 +1,9 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 import '../../widgets/appbar.dart';
 import '../auth/login.dart';
 
@@ -10,6 +15,10 @@ class UserFormScreen extends StatefulWidget {
 }
 
 class _UserFormScreenState extends State<UserFormScreen> {
+  static const String apiBase = 'https://huellassalud.onrender.com';
+
+  static const String defaultRole = 'CLIENTE';
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
@@ -21,79 +30,6 @@ class _UserFormScreenState extends State<UserFormScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  void _navigationLogin() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen())
-    );
-  }
-
-  void _register() {
-    if (_formKey.currentState!.validate()) {
-      if (_passwordController.text != _confirmPasswordController.text) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Las contraseñas no coinciden')),
-        );
-        return;
-      }
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Registro Exitoso'),
-            content: const Text('¡Te has registrado correctamente!'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-
-                  _formKey.currentState!.reset();
-                  _nameController.clear();
-                  _emailController.clear();
-                  _passwordController.clear();
-                  _documentController.clear();
-                  _addressController.clear();
-                  _confirmPasswordController.clear();
-                  _phoneController.clear();
-                  setState(() {
-                    _acceptTerms = false;
-                  });
-                },
-                child: const Text('Aceptar'),
-              ),
-            ],
-          );
-        },
-      );
-
-      final userData = {
-        'name': _nameController.text,
-        'lasName': _lastNameController.text,
-        'email': _emailController.text,
-        'document': _documentController.text,
-        'address': _addressController.text,
-        'phone': _phoneController.text,
-        'password': _passwordController.text,
-      };
-
-      Navigator.pop(context, userData);
-    } else {
-      if (!_acceptTerms) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Debes aceptar los Términos y Condiciones'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  void _cancel() {
-    Navigator.pop(context);
-  }
-
   String _selectedDocumentT = 'Cédula de ciudadania';
   bool _acceptTerms = false;
 
@@ -102,6 +38,222 @@ class _UserFormScreenState extends State<UserFormScreen> {
     'Cédula de extranjeria',
     'Tarjeta de identidad',
   ];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _documentController.dispose();
+    _addressController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  void _navigationLogin() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  Uri _buildUrl(String path) {
+    final base = apiBase.endsWith('/') ? apiBase.substring(0, apiBase.length - 1) : apiBase;
+    final normalizedPath = path.startsWith('/') ? path : '/$path';
+    return Uri.parse(base + normalizedPath);
+  }
+
+  // Mapea la etiqueta visible a los códigos que espera la API
+  String _mapDocumentType(String label) {
+    switch (label) {
+      case 'Cédula de ciudadania':
+        return 'CC';
+      case 'Cédula de extranjeria':
+        return 'CE';
+      case 'Tarjeta de identidad':
+        return 'TI';
+      default:
+        return label; // si ya viene en formato corto
+    }
+  }
+
+  Future<void> _register() async {
+    if (!_acceptTerms) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Debes aceptar los Términos y Condiciones'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    if (_passwordController.text != _confirmPasswordController.text) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Las contraseñas no coinciden')),
+        );
+      }
+      return;
+    }
+
+    // Payload adaptado al contrato que mostraste
+    final userData = {
+      'name': _nameController.text.trim(),
+      'lastName': _lastNameController.text.trim(),
+      'documentType': _mapDocumentType(_selectedDocumentT),
+      'documentNumber': _documentController.text.trim(),
+      'email': _emailController.text.trim(),
+      'cellPhone': _phoneController.text.trim(),
+      'address': _addressController.text.trim(),
+      'password': _passwordController.text,
+      'role': defaultRole,
+    };
+
+    // Mostrar indicador de carga
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    try {
+      final url = _buildUrl('/internal/user/register');
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+      // La API espera { "data": { ... } }
+      final body = jsonEncode({'data': userData});
+
+      // DEBUG: imprimir request completo
+      // ignore: avoid_print
+      print('--- REQUEST -> POST $url');
+      // ignore: avoid_print
+      print('Headers: $headers');
+      // ignore: avoid_print
+      print('Body: $body');
+
+      final response = await http
+          .post(
+            url,
+            headers: headers,
+            body: body,
+          )
+          .timeout(const Duration(seconds: 20));
+
+      // DEBUG: imprimir respuesta completa
+      // ignore: avoid_print
+      print('--- RESPONSE <- ${response.statusCode} ${response.reasonPhrase}');
+      // ignore: avoid_print
+      print('Response headers: ${response.headers}');
+      // ignore: avoid_print
+      print('Response body: ${response.body}');
+
+      // Cerrar loading
+      try {
+        Navigator.of(context, rootNavigator: true).pop();
+      } catch (_) {}
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        dynamic responseBody;
+        try {
+          responseBody = jsonDecode(response.body);
+        } catch (_) {
+          responseBody = null;
+        }
+
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Registro Exitoso'),
+                content: const Text('¡Te has registrado correctamente! por favor validar el correo.'),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+
+                      _formKey.currentState!.reset();
+                      _nameController.clear();
+                      _lastNameController.clear();
+                      _emailController.clear();
+                      _passwordController.clear();
+                      _documentController.clear();
+                      _addressController.clear();
+                      _confirmPasswordController.clear();
+                      _phoneController.clear();
+                      setState(() {
+                        _acceptTerms = false;
+                      });
+
+                      Navigator.pop(context, responseBody ?? userData);
+                    },
+                    child: const Text('Aceptar'),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } else {
+        String message = 'Error en el registro. Intenta de nuevo. (${response.statusCode})';
+        try {
+          final errorBody = jsonDecode(response.body);
+          if (errorBody is Map && errorBody['message'] != null) {
+            message = errorBody['message'].toString();
+          } else {
+            message = '(${response.statusCode}) ${response.body}';
+          }
+        } catch (_) {
+          message = '(${response.statusCode}) ${response.body}';
+        }
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message), backgroundColor: Colors.red),
+          );
+        }
+      }
+    } on TimeoutException catch (e) {
+      try {
+        Navigator.of(context, rootNavigator: true).pop();
+      } catch (_) {}
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Tiempo de espera agotado'), backgroundColor: Colors.red),
+        );
+      }
+      // ignore: avoid_print
+      print('Timeout en register: $e');
+    } catch (e) {
+      try {
+        Navigator.of(context, rootNavigator: true).pop();
+      } catch (_) {}
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error de red: ${e.toString()}'), backgroundColor: Colors.red),
+        );
+      }
+      // ignore: avoid_print
+      print('Exception en register: $e');
+    }
+  }
+
+  void _cancel() {
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,8 +337,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese su número de documento';
                   }
-                  if (value.length < 3) {
-                    return 'El número de documento debe tener al menos 10 caracteres';
+                  if (value.length < 6) {
+                    return 'El número de documento es muy corto';
                   }
                   return null;
                 },
@@ -225,8 +377,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese su teléfono';
                   }
-                  if (value.length < 3) {
-                    return 'El teléfono debe tener al menos 10 caracteres';
+                  if (value.length < 7) {
+                    return 'El teléfono es muy corto';
                   }
                   return null;
                 },
@@ -267,10 +419,8 @@ class _UserFormScreenState extends State<UserFormScreen> {
                   if (value == null || value.isEmpty) {
                     return 'Por favor ingrese una contraseña';
                   }
-                  if (!RegExp(
-                    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,16}$',
-                  ).hasMatch(value)) {
-                    return 'Debe tener entre 8 y 16 caracteres,\ncon al menos una mayúscula, una minúscula,\nun número y un carácter especial';
+                  if (value.length < 8) {
+                    return 'La contraseña debe tener al menos 8 caracteres';
                   }
                   return null;
                 },
@@ -302,7 +452,7 @@ class _UserFormScreenState extends State<UserFormScreen> {
                     value: _acceptTerms,
                     onChanged: (bool? value) {
                       setState(() {
-                        _acceptTerms = value!;
+                        _acceptTerms = value ?? false;
                       });
                     },
                   ),
