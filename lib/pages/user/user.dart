@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/appbar.dart';
 import './users.dart';
 import '../pets/pets.dart';
-import '../invoices/history_invoice.dart';
+import '../invoices/invoice_list_page.dart';
 import '../auth/login.dart';
 
 class UserScreen extends StatelessWidget {
@@ -118,7 +118,7 @@ class UserScreen extends StatelessWidget {
                   context,
                   Icons.receipt_long,
                   'Facturas',
-                  const HistorialFacturasScreen(),
+                  const InvoiceListPage(),
                 ),
                 const SizedBox(height: 10),
                 _buildLogoutCard(context),

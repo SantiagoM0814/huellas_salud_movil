@@ -1,58 +1,71 @@
-class Factura {
-  final String id;
-  final int numero;
-  final String cliente;
-  final String mascota;
-  final String fecha;
-  final double monto;
-  final String estado;
-  final List<ItemFactura> items;
-  final int envio;
+class Invoice {
+  final String idInvoice;
+  final DateTime? date;
+  final String idClient;
+  final String nameUserCreated;
+  final num total;
+  final String typeInvoice;
+  final String status;
+  final List<ItemInvoice> itemInvoice;
 
-  Factura({
-    required this.id,
-    required this.numero,
-    required this.cliente,
-    required this.mascota,
-    required this.fecha,
-    required this.monto,
-    required this.estado,
-    required this.items,
-    required this.envio,
+  Invoice({
+    required this.idInvoice,
+    required this.date,
+    required this.idClient,
+    required this.nameUserCreated,
+    required this.total,
+    required this.typeInvoice,
+    required this.status,
+    required this.itemInvoice,
   });
 
-  factory Factura.fromJson(Map<String, dynamic> json) {
+  factory Invoice.fromJson(Map<String, dynamic> json) {
     final data = json['data'] ?? {};
-    return Factura(
-      id: data['id'] ?? '',
-      numero: data['numero'] ?? 0,
-      cliente: data['cliente'] ?? '',
-      mascota: data['mascota'] ?? '',
-      fecha: data['fecha'] ?? '',
-      monto: (data['monto'] ?? 0).toDouble(),
-      estado: data['estado'] ?? '',
-      items: (data['items'] as List<dynamic>? ?? []).map((item) => ItemFactura.fromJson(item)).toList(),
-      envio: data['envio'] ?? 0,
+    final meta = json['meta'] ?? {};
+
+    return Invoice(
+      idInvoice: data['idInvoice'] ?? '',
+      date: data['date'] != null ? DateTime.tryParse(data['date']) : null,
+      idClient: data['idClient'] ?? '',
+      nameUserCreated: meta['nameUserCreated'] ?? '',
+      total: data['total'] ?? 0,
+      typeInvoice: data['typeInvoice'] ?? '',
+      status: data['status'] ?? '',
+      itemInvoice: (data['itemInvoice'] as List<dynamic>? ?? [])
+          .map((i) => ItemInvoice.fromJson(i))
+          .toList(),
     );
   }
 }
 
-class ItemFactura {
-  final String descripcion;
-  final int cantidad;
-  final double precio;
+class ItemInvoice {
+  final String? idProduct;
+  final String? idService;
+  final String? idPet;
+  String? name; // ← Se rellena después
+  final int quantity;
+  final num unitPrice;
+  final num subTotal;
 
-  ItemFactura({
-    required this.descripcion,
-    required this.cantidad,
-    required this.precio,
+  ItemInvoice({
+    required this.idProduct,
+    required this.idService,
+    required this.idPet,
+    this.name,
+    required this.quantity,
+    required this.unitPrice,
+    required this.subTotal,
   });
 
-  factory ItemFactura.fromJson(Map<String, dynamic> json) {
-    return ItemFactura(
-      descripcion: json['descripcion'] ?? '',
-      cantidad: json['cantidad'] ?? 0,
-      precio: (json['precio'] ?? 0).toDouble(),
+  factory ItemInvoice.fromJson(Map<String, dynamic> json) {
+    return ItemInvoice(
+      idProduct: json['idProduct'],
+      idService: json['idService'],
+      idPet: json['idPet'],
+      name: null, 
+      quantity: json['quantity'] ?? 0,
+      unitPrice: json['unitPrice'] ?? 0,
+      subTotal: json['subTotal'] ?? 0,
     );
   }
 }

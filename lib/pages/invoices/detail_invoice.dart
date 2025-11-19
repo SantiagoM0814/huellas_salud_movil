@@ -1,70 +1,92 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../models/invoice.dart';
+import '../../services/invoices_services.dart';
 
-class DetalleFacturaScreen extends StatelessWidget {
-  final Factura factura;
+class DetailInvoicePage extends StatefulWidget {
+  final Invoice invoice;
+  final String invoiceNumber;
 
-  const DetalleFacturaScreen({Key? key, required this.factura}) : super(key: key);
+  const DetailInvoicePage({
+    super.key,
+    required this.invoice,
+    required this.invoiceNumber,
+  });
+
+  @override
+  State<DetailInvoicePage> createState() => _DetailInvoicePageState();
+}
+
+class _DetailInvoicePageState extends State<DetailInvoicePage> {
+  final InvoiceService productService = InvoiceService();
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadItemNames();
+  }
+
+  Future<void> loadItemNames() async {
+    for (var item in widget.invoice.itemInvoice) {
+      if (item.idProduct != null) {
+        item.name = await productService.getProductName(item.idProduct!);
+      } else if (item.idService != null) {
+        item.name = await productService.getServiceName(item.idService!);
+      } else {
+        item.name = "Producto/Servicio";
+      }
+    }
+    setState(() => loading = false);
+  }
+
+  String _formatPrice(num value) {
+    return NumberFormat('#,###').format(value);
+  }
+
+  String _dateFormat(DateTime? date) {
+    if (date == null) return 'Sin fecha';
+    return DateFormat('dd/MM/yyyy hh:mm a').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final iva = factura.monto * 0.19;
-    final subtotal = factura.monto - iva - factura.envio;
+    if (loading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Detalle de Factura'),
-      ),
+      appBar: AppBar(title: const Text("Detalle de Factura")),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
               child: Text(
-                'Factura #${factura.numero}',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ),
-            SizedBox(height: 20),
-           
-            _buildInfoRow('Fecha:', factura.fecha),
-            _buildInfoRow('Cliente:', factura.cliente),
-            _buildInfoRow('Mascota:', factura.mascota),
-           
-            Divider(height: 30),
-           
-            Text('Productos/Servicios:', style: TextStyle(fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-           
-            ...factura.items.map((item) => _buildItemRow(item)).toList(),
-           
-            Divider(height: 30),
-           
-            _buildTotalRow('Subtotal', subtotal),
-            _buildTotalRow('Envío', factura.envio.toDouble(), isFree: factura.envio == 0),
-            _buildTotalRow('IVA (19%)', iva),
-            SizedBox(height: 10),
-            _buildTotalRow('TOTAL', factura.monto, isTotal: true),
-           
-            SizedBox(height: 30),
-           
-            Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: _getColorByEstado(factura.estado).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  'Estado: ${factura.estado}',
-                  style: TextStyle(
-                    color: _getColorByEstado(factura.estado),
-                    fontWeight: FontWeight.bold,
-                  ),
+                'Factura #${widget.invoiceNumber}',
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+
+            _buildInfoRow('Cliente:', widget.invoice.nameUserCreated),
+            _buildInfoRow('Fecha:', _dateFormat(widget.invoice.date)),
+
+            const Divider(height: 30),
+            const Text('Productos/Servicios:',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+
+            ...widget.invoice.itemInvoice.map(_buildItemRow).toList(),
+
+            const Divider(height: 30),
+            _buildTotalRow("TOTAL", widget.invoice.total),
           ],
         ),
       ),
@@ -73,35 +95,41 @@ class DetalleFacturaScreen extends StatelessWidget {
 
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-          SizedBox(width: 10),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+          const SizedBox(width: 10),
           Expanded(child: Text(value)),
         ],
       ),
     );
   }
 
-  Widget _buildItemRow(ItemFactura item) {
+  Widget _buildItemRow(ItemInvoice item) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             flex: 3,
-            child: Text(item.descripcion),
+            child: Text(
+              item.name ?? "Producto/Servicio",
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
           ),
           Expanded(
             flex: 1,
-            child: Text('${item.cantidad}', textAlign: TextAlign.center),
+            child: Text(
+              '${item.quantity}',
+              textAlign: TextAlign.center,
+            ),
           ),
           Expanded(
             flex: 2,
             child: Text(
-              '\$${_formatPrice(item.precio)}',
+              '\$${_formatPrice(item.unitPrice)}',
               textAlign: TextAlign.right,
             ),
           ),
@@ -110,40 +138,16 @@ class DetalleFacturaScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalRow(String label, double value, {bool isFree = false, bool isTotal = false}) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(fontWeight: isTotal ? FontWeight.bold : FontWeight.normal),
-          ),
-          Text(
-            isFree ? 'Gratis' : '\$${_formatPrice(value)}',
-            style: TextStyle(fontWeight: isTotal ? FontWeight.bold : FontWeight.normal),
-          ),
-        ],
-      ),
+  Widget _buildTotalRow(String label, num value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Text(
+          '\$${_formatPrice(value)}',
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ],
     );
-  }
-
-  String _formatPrice(double price) {
-    return price.toStringAsFixed(0).replaceAllMapped(
-        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},');
-  }
-
-  Color _getColorByEstado(String estado) {
-    switch (estado) {
-      case 'Pagada':
-        return Colors.green;
-      case 'Pendiente':
-        return Colors.orange;
-      case 'Cancelada':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
   }
 }
