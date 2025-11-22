@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import '../models/pets.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PetService {
   final Dio _dio = Dio(
@@ -10,53 +13,84 @@ class PetService {
     ),
   );
 
-  Future<List<Pet>> fetchPet({int limit = 20, int offset = 0}) async {
-    try {
-      final response = await _dio.get(
-        'pet/list-pets',
-        queryParameters: {'limit': limit, 'offset': offset},
-      );
-
-      if (response.statusCode == 200) {
-        final List<dynamic> results = response.data;
-
-        // Mapear solo los datos que vienen en results sin hacer peticiones extra
-        final List<Pet> pets = results.map((item) {
-          final data = item['data'] ?? {};
-
-          MediaFile? mediaFile;
-          if (data['mediaFile'] != null) {
-            final mf = data['mediaFile'];
-            mediaFile = MediaFile(
-              fileName: mf['fileName'] ?? '',
-              contentType: mf['contentType'] ?? '',
-              attachment: mf['attachment'] ?? '',
-            );
+  PetService() {
+    _dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final prefs = await SharedPreferences.getInstance();
+          final token = prefs.getString('auth_token');
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
           }
+          return handler.next(options);
+        },
+      ),
+    );
+  }
+  //esto lo hizo el flaco man
+  Future<List<Pet>> fetchPet({int limit = 20, int offset = 0}) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final authUserString = prefs.getString('auth_user');
 
-          return Pet(
-            idPet: data['idPet']
-                .toString(), // convertimos a String por seguridad
-            name: data['name'] ?? 'Sin nombre',
-            species: data['species'],
-            sex: data['sex'],
-            age: data['age'],
-            mediaFile: mediaFile,
+    String? documentNumber; // 👈 declarar antes del if
+
+    if (authUserString != null) {
+      final authUser = jsonDecode(authUserString);
+      documentNumber = authUser['data']['documentNumber'];
+
+      print("👤 authUser: $authUser");
+      print("📌 Documento: $documentNumber");
+    }
+
+    if (documentNumber == null) {
+      throw Exception("auth_user no encontrado o inválido");
+    }
+
+    final response = await _dio.get(
+      'pet/owners-pets/$documentNumber',
+      queryParameters: {'limit': limit, 'offset': offset},
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> results = response.data;
+
+      final List<Pet> pets = results.map((item) {
+        final data = item['data'] ?? {};
+
+        MediaFile? mediaFile;
+        if (data['mediaFile'] != null) {
+          final mf = data['mediaFile'];
+          mediaFile = MediaFile(
+            fileName: mf['fileName'] ?? '',
+            contentType: mf['contentType'] ?? '',
+            attachment: mf['attachment'] ?? '',
           );
-        }).toList();
+        }
 
-        return pets;
-      } else {
-        throw Exception('Failed to load pets');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception('Error: ${e.response!.statusCode}');
-      } else {
-        throw Exception('Network error: ${e.message}');
-      }
+        return Pet(
+          idPet: data['idPet'].toString(),
+          name: data['name'] ?? 'Sin nombre',
+          species: data['species'],
+          sex: data['sex'],
+          age: data['age'],
+          mediaFile: mediaFile,
+        );
+      }).toList();
+
+      return pets;
+    } else {
+      throw Exception('Failed to load pets');
+    }
+  } on DioException catch (e) {
+    if (e.response != null) {
+      throw Exception('Error: ${e.response!.statusCode}');
+    } else {
+      throw Exception('Network error: ${e.message}');
     }
   }
+}
+
 
   Future<Pet> fetchProductById(int id) async {
     try {
